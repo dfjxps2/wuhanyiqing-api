@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.infoInto.dao.T01DetainedPersonInfoDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.infoInto.entity.T01DetainedPersonInfoEntity" id="t01DetainedPersonInfoMap">
+        <result property="id" column="id"/>
+        <result property="areaCd" column="area_cd"/>
+        <result property="detainedName" column="Detained_name"/>
+        <result property="telephone" column="Telephone"/>
+        <result property="cardNumber" column="card_number"/>
+        <result property="detainedPersonTypeCd" column="Detained_person_type_cd"/>
+        <result property="address" column="address"/>
+        <result property="destCity" column="dest_city"/>
+        <result property="detainedPersonStatusCd" column="Detained_person_status_cd"/>
+        <result property="appealChannelCd" column="appeal_channel_cd"/>
+        <result property="resetMode" column="reset_mode"/>
+        <result property="appealTypeCd" column="appeal_type_cd"/>
+        <result property="submitUserId" column="submit_user_id"/>
+        <result property="reviewUserId" column="review_user_id"/>
+        <result property="submitDate" column="submit_date"/>
+        <result property="reviewDate" column="review_date"/>
+        <result property="commitDate" column="commit_date"/>
+        <result property="keepStatusCd" column="keep_status_cd"/>
+        <result property="detainedInfo" column="Detained_info"/>
+        <result property="bz" column="bz"/>
+    </resultMap>
+
+    <select id="queryPage" resultMap="t01DetainedPersonInfoMap">
+        SELECT info.* from t01_detained_person_info info
+        WHERE 1=1
+        <if test="param.submitDate != null and param.submitDate!= ''">
+            and info.submit_date=#{param.submitDate}
+        </if>
+        <if test="param.keepStatusCd != null and param.keepStatusCd!= ''">
+            AND info.keep_status_cd = #{param.keepStatusCd}
+        </if>
+    </select>
+
+
+</mapper>
