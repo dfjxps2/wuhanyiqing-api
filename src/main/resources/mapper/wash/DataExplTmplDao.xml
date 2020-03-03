@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.wash.dao.DataExplTmplDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.wash.entity.DataExplTmplEntity" id="dataExplTmplMap">
+        <result property="dataExplTmplid" column="Data_Expl_Tmplid"/>
+        <result property="dataExplTmplNm" column="Data_Expl_Tmpl_Nm"/>
+        <result property="dataExplTmplDesc" column="Data_Expl_Tmpl_Desc"/>
+        <result property="tmplType" column="Tmpl_Type"/>
+        <result property="tnmtid" column="Tnmtid"/>
+    </resultMap>
+
+    <select id="queryByMdNm" parameterType="string" resultType="io.dfjinxin.modules.wash.entity.DataExplTmplEntity">
+        select * from data_expl_tmpl where Data_Expl_Tmpl_Nm =  #{key}
+    </select>
+
+    <!-- 查询报告模板 -->
+    <select id="selectByExplId" resultType="map">
+        SELECT t1.Data_Expl_Tmplid,t1.Data_Expl_Tmpl_Nm,t1.Data_Expl_Tmpl_Desc,t2.Exct_Ord,
+        CASE WHEN t1.Data_Expl_Tmplid = t3.Data_Expl_Tmplid OR t1.Data_Expl_Tmplid = t4.Data_Expl_Tmplid OR t5.Data_Expl_Tmplid = t1.Data_Expl_Tmplid THEN 0 ELSE 1 END If_Use
+        FROM data_expl_tmpl t1
+        LEFT JOIN data_expl_tmpl_proj t2 ON t1.Data_Expl_Tmplid = t2.Data_Expl_Tmplid
+        LEFT JOIN data_fld_expl_proj t3 ON t1.Data_Expl_Tmplid = t3.Data_Expl_Tmplid
+        LEFT JOIN data_tbl_expl_proj t4 ON t1.Data_Expl_Tmplid = t4.Data_Expl_Tmplid
+        LEFT JOIN expl_tmpl_auto_match_rule t5 ON t5.Data_Expl_Tmplid = t1.Data_Expl_Tmplid
+        WHERE 1 = 1
+        AND t1.Tnmtid = #{p.tnmtid}
+        <if test="p.containsKey('expName') and p.expName != null and p.expName != ''" >
+            and t1.Data_Expl_Tmpl_Nm LIKE concat('%',#{p.expName},'%')
+        </if>
+        GROUP BY t1.Data_Expl_Tmplid
+        ORDER BY t1.Data_Expl_Tmplid
+    </select>
+
+    <!-- 查询报告模板 -->
+    <select id="queryProj" resultType="map">
+       SELECT a.Chk_Projid,b.Chk_Proj_Nm,c.Data_Expl_Tmplid FROM data_expl_tmpl_proj a
+        LEFT JOIN data_chk_proj b ON a.Chk_Projid = b.Chk_Projid
+        LEFT JOIN data_expl_tmpl c ON c.Data_Expl_Tmplid = a.Data_Expl_Tmplid
+        WHERE  a.Chk_Projid = b.Chk_Projid and c.Data_Expl_Tmplid is not null
+        ORDER BY a.Exct_Ord
+    </select>
+
+    <!-- 根据id查询报告模板 -->
+    <select id="getExplById" resultType="map">
+      SELECT t1.Data_Expl_Tmplid,t1.Data_Expl_Tmpl_Nm,t1.Data_Expl_Tmpl_Desc,t2.Chk_Projid FROM data_expl_tmpl t1
+            LEFT JOIN  data_expl_tmpl_proj t2 ON t1.Data_Expl_Tmplid = t2.Data_Expl_Tmplid
+            LEFT JOIN data_chk_proj t3 ON t2.Chk_Projid = t3.Chk_Projid
+            where t1.Data_Expl_Tmplid = #{id}
+    </select>
+
+
+
+</mapper>

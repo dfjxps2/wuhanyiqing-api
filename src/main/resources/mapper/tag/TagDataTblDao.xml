@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.tag.dao.TagDataTblDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.tag.entity.TagDataTblEntity" id="dataTblMap">
+        <result property="dataTblid" column="Data_Tblid"/>
+        <result property="dbid" column="Dbid"/>
+        <result property="dataTblPhysNm" column="Data_Tbl_Phys_Nm"/>
+        <result property="dataTblCnNm" column="Data_Tbl_Cn_Nm"/>
+        <result property="dataTblDesc" column="Data_Tbl_Desc"/>
+        <result property="createDt" column="Create_Dt"/>
+        <result property="updDt" column="Upd_Dt"/>
+        <result property="delDt" column="Del_Dt"/>
+        <result property="dbPhysNm" column="Db_Phys_Nm"/>
+    </resultMap>
+
+    <select id="queryListByCriteria" resultMap="dataTblMap">
+        SELECT distinct
+        dt.Data_Tblid,
+        dt.Data_Tbl_Cn_Nm,
+        dt.Data_Tbl_Phys_Nm,
+        db.Db_Phys_Nm,
+        db.dbid as dbid
+        from data_tbl dt
+        left join db db on dt.Dbid=db.Dbid
+        left join data_tbl_mark_idx dtmi on dt.Data_Tblid = dtmi.Data_Tblid
+        left join db_usage du on db.Db_Usageid=du.Db_UsageId
+        WHERE 1=1
+        <!-- 分区 -->
+        AND db.Partid = #{param.partid}
+        and dt.Del_Dt is null
+        and du.db_usage_cd in('02','07','08')
+
+        <!-- 选择了数据源  -->
+        <if test="param.dataSrcid != null and param.dataSrcid != ''">
+            and dt.Data_Srcid = #{param.dataSrcid}
+        </if>
+
+        <!-- 选择了数据库  -->
+        <if test="param.dbId != null and param.dbId != ''">
+            and db.dbid = #{param.dbId}
+        </if>
+
+        <!-- 如果填写表名称 -->
+        <if test="param.tableName != null and param.tableName != ''">
+            AND (dt.Data_Tbl_Phys_Nm like CONCAT('%', #{param.tableName, jdbcType=VARCHAR}, '%')
+            OR dt.Data_Tbl_Cn_Nm like CONCAT('%', #{param.tableName, jdbcType=VARCHAR}, '%'))
+        </if>
+
+        <!-- 如果勾选了数据表标引 -->
+        <if test="param.tableMarks!=null and param.tableMarks.length>0">
+            <!--表级标签:即可选项为标签类目，结果集为该标签类目下所有标签被标引过的表-->
+            and dtmi.Labelid in(
+            select lab.Labelid from label lab where lab.Label_Catgid in
+                <foreach collection="param.tableMarks" item="id" index="index" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>)
+        </if>
+        <!-- dt.Data_Tblid ASC-->
+        order by db.Dbid ASC,dt.Data_Tblid ASC
+        LIMIT #{param.start}, #{param.pageSize}
+    </select>
+
+    <select id="queryCountByCriteria" resultType="java.lang.Integer">
+        SELECT count(distinct dt.Data_Tblid)
+        from data_tbl dt
+        left join db db on dt.Dbid=db.Dbid
+        left join data_tbl_mark_idx dtmi on dt.Data_Tblid = dtmi.Data_Tblid
+        left join db_usage du on db.Db_Usageid= du.Db_UsageId
+        WHERE 1=1
+        and dt.Del_Dt is null
+        <!-- 分区 -->
+        AND db.Partid = #{param.partid}
+        and du.db_usage_cd in('02','07','08')
+
+        <!-- 选择了数据源  -->
+        <if test="param.dataSrcid != null and param.dataSrcid != ''">
+            and dt.Data_Srcid = #{param.dataSrcid}
+        </if>
+
+        <!-- 选择了数据库  -->
+        <if test="param.dbId != null and param.dbId != ''">
+            and db.dbid = #{param.dbId}
+        </if>
+
+        <!-- 如果填写表名称 -->
+        <if test="param.tableName != null and param.tableName != ''">
+            AND (dt.Data_Tbl_Phys_Nm like CONCAT('%', #{param.tableName, jdbcType=VARCHAR}, '%')
+            OR dt.Data_Tbl_Cn_Nm like CONCAT('%', #{param.tableName, jdbcType=VARCHAR}, '%'))
+        </if>
+
+        <!-- 如果勾选了数据表标引 -->
+        <if test="param.tableMarks!=null and param.tableMarks.length>0">
+            <!--表级标签:即可选项为标签类目，结果集为该标签类目下所有标签被标引过的表-->
+            and dtmi.Labelid in(
+            select lab.Labelid from label lab where lab.Label_Catgid in
+            <foreach collection="param.tableMarks" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>)
+        </if>
+
+    </select>
+
+</mapper>

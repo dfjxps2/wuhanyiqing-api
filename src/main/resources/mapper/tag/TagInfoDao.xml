@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.tag.dao.TagInfoDao">
+
+    <resultMap type="io.dfjinxin.modules.tag.entity.TagInfoEntity" id="labelMap">
+        <result property="labelid" column="Labelid"/>
+        <result property="labelCd" column="Label_Cd"/>
+        <result property="labelNm" column="Label_Nm"/>
+        <result property="labelCatgid" column="Label_Catgid"/>
+        <result property="labelDesc" column="Label_Desc"/>
+        <result property="ifReadOnly" column="If_Read_Only"/>
+        <result property="tnmtid" column="Tnmtid"/>
+        <result property="usedTimes" column="usedTimes"/>
+        <result property="fldid" column="Fldid"/>
+    </resultMap>
+
+    <!-- 获取字段标签 modify by zhc 7.4 -->
+    <select id="queryFldTagInfoList" resultMap="labelMap">
+        select
+        lab.Labelid,
+        lab.Label_Cd,
+        lab.Label_Nm,
+        lab.Label_Catgid,
+        lab.Label_Desc,
+        lab.If_Read_Only,
+        count(dfmi.Fldid) as usedTimes
+        from label lab
+        left join data_fld_mark_idx dfmi
+        on lab.Labelid=dfmi.Labelid
+        left join label_catg lc on lab.Label_Catgid = lc.Label_Catgid
+        where lab.Tnmtid=#{tenantId}
+        group by lab.Labelid
+    </select>
+
+    <!-- 获取表标签 modify by zhc 7.4 -->
+    <select id="queryTblTagInfoList" resultMap="labelMap">
+        select
+            lab.Labelid,
+            lab.Label_Cd,
+            lab.Label_Nm,
+            lab.Label_Catgid,
+            lab.Label_Desc,
+            lab.If_Read_Only,
+            count(dfmi.Data_Tblid) as usedTimes
+        from label lab
+        left join data_tbl_mark_idx dfmi
+        on lab.Labelid=dfmi.Labelid
+        left join label_catg lc on lab.Label_Catgid = lc.Label_Catgid
+        where lab.Tnmtid=#{tenantId}
+        group by lab.Labelid
+    </select>
+
+    <select id="queryRuleInfoList" resultMap="labelMap">
+        select
+            lab.Labelid,
+            lab.Label_Cd,
+            lab.Label_Nm,
+            lab.Label_Catgid,
+            lab.Label_Desc,
+            count(rule.ruleid) as usedTimes
+        from label lab
+        left join auto_mark_idx_rule rule
+        on lab.Labelid=rule.Labelid
+        left join label_catg lc on lab.Label_Catgid = lc.Label_Catgid
+        where lab.Tnmtid=#{tenantId}
+        group by lab.Labelid
+    </select>
+
+
+    <insert id="saveAndGetId" parameterType="io.dfjinxin.modules.tag.entity.TagInfoEntity">
+        <selectKey keyProperty="labelid" resultType="java.lang.Integer" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into label(Label_Cd,Label_Nm,Label_Catgid,Label_Desc,Tnmtid,If_Read_Only)
+        values(#{labelCd},#{labelNm},#{labelCatgid},#{labelDesc},#{tnmtid},#{ifReadOnly})
+    </insert>
+
+
+    <select id="queryLabelsByFldId" resultType="io.dfjinxin.modules.tag.entity.TagInfoEntity">
+        select
+            lab.Labelid,
+            lab.Label_Cd,
+            lab.Label_Nm,
+            lab.Label_Catgid
+        from data_fld_mark_idx dfmi
+        left join label lab on dfmi.Labelid= lab.Labelid
+        where dfmi.Fldid=#{fldid} and lab.Tnmtid=#{tenantId}
+    </select>
+
+</mapper>

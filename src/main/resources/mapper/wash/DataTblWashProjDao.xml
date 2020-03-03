@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.wash.dao.DataTblWashProjDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.wash.entity.DataTblWashProjEntity" id="dataTblWashProjMap">
+        <result property="dataTblid" column="Data_Tblid"/>
+        <result property="dataWashCmpuid" column="Data_Wash_Cmpuid"/>
+        <result property="chkProjid" column="Chk_Projid"/>
+        <result property="exctOrd" column="Exct_Ord"/>
+        <result property="paraid" column="Paraid"/>
+    </resultMap>
+
+    <select id="queryRuleList" resultType="map">
+        select x.dataTblCnNm,x.dataTblPhysNm, x.updDt, x.delDt
+        ,x.dataSrcNm, x.dpDt, x.dataTblid,x.dataSrcid,x.metaStatus,(CASE WHEN x.pubStatus = '1' THEN '已发布' WHEN x.pubStatus = '2' THEN '已失效' ELSE '未发布' END) AS pubStatus  from (
+        select t.Data_Tbl_Cn_Nm dataTblCnNm,t.Data_Tbl_Phys_Nm dataTblPhysNm, t.Upd_Dt updDt, t.Del_Dt delDt,d.Db_usageid dbUsageid
+        ,s.Data_Src_Nm dataSrcNm, p.dpDt, pd.Job_Release_Date ,pd.Job_Start_Time,t.Data_Tblid dataTblid,s.Data_Srcid dataSrcid, (CASE WHEN pd.Job_Expire_Date is not null THEN '2' WHEN pd.Jobid is not null THEN '1' ELSE '0' END) as pubStatus,(CASE WHEN t.Del_Dt = CURRENT_DATE   THEN '3' WHEN t.Create_Dt = CURRENT_DATE THEN '0' WHEN t.Upd_Dt =CURRENT_DATE THEN '1' ELSE '2' END) metaStatus
+        from data_tbl t
+        left join db d on d.Dbid=t.Dbid
+        left join data_src s on t.Data_Srcid=s.Data_Srcid
+        left join (select max(Dp_Dt) dpDt,Data_Tblid from dp group by Data_Tblid) p on t.Data_Tblid=p.Data_Tblid
+        left join data_part p on d.Partid=p.Partid
+        left join prd_data_proc_job pd on pd.Data_Tblid=t.Data_Tblid and pd.Job_Type=1
+        where p.Tnmtid=#{m.tenantId}) x
+        where x.delDt is null and x.dbUsageid = 2
+        <if test="m.containsKey('dataSrcid') and m.dataSrcid != null and m.dataSrcid != ''">
+          and x.dataSrcid = #{m.dataSrcid}
+        </if>
+        <if test="m.containsKey('keyWord') and m.keyWord != null and m.keyWord != ''">
+          and (x.dataTblCnNm like concat('%',#{m.keyWord},'%') or x.dataTblPhysNm like concat('%',#{m.keyWord},'%') )
+        </if>
+        <if test="m.containsKey('dataTblid') and m.dataTblid != null and m.dataTblid != ''">
+            and x.dataTblid in (${m.dataTblid})
+        </if>
+        <if test="m.containsKey('metaStatus') and m.metaStatus != null and m.metaStatus != ''">
+            and x.metaStatus = #{m.metaStatus}
+        </if>
+        <if test="m.containsKey('pubStatus') and m.pubStatus != null and m.pubStatus != ''">
+            and x.pubStatus = #{m.pubStatus}
+        </if>
+        order by  x.metaStatus,x.dataTblCnNm desc
+	</select>
+</mapper>

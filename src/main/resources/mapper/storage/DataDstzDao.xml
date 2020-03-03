@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.storage.dao.DataDstzDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.storage.entity.DataDstzEntity" id="dataDstzMap">
+        <result property="fldid" column="Fldid"/>
+        <result property="setupDt" column="Setup_Dt"/>
+        <result property="dataDstzTypeid" column="Data_Dstz_Typeid"/>
+        <result property="dataDstzAlgorid" column="Data_Dstz_Algorid"/>
+        <result property="dataDstzAlgorPara" column="Data_Dstz_Algor_Para"/>
+    </resultMap>
+
+
+</mapper>

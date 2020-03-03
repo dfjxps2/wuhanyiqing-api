@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.wash.dao.DataChkProjDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.wash.entity.DataChkProjEntity" id="dataChkProjMap">
+        <result property="chkProjid" column="Chk_Projid"/>
+        <result property="chkProjCd" column="Chk_Proj_Cd"/>
+        <result property="chkProjNm" column="Chk_Proj_Nm"/>
+        <result property="chkProjDesc" column="Chk_Proj_Desc"/>
+        <result property="chkProjStus" column="Chk_Proj_Stus"/>
+        <result property="dataWashCmpuid" column="Data_Wash_Cmpuid"/>
+        <result property="chkProjInternal" column="Chk_Proj_Internal"/>
+        <result property="chkProjEvalExpr" column="Chk_Proj_Eval_Expr"/>
+        <result property="chkProjEvalType" column="Chk_Proj_Eval_Type"/>
+        <result property="chkProjSource" column="Chk_Proj_Source"/>
+        <result property="tnmtid" column="tnmtid"/>
+    </resultMap>
+
+    <select id="selectOneByName" resultMap="dataChkProjMap">
+        select
+            dcp.Chk_Projid,
+            dcp.Chk_Proj_Cd,
+            dcp.Chk_Proj_Nm,
+            dcp.Chk_Proj_Desc,
+            dcp.Chk_Proj_Stus,
+            dcp.Data_Wash_Cmpuid,
+            dcp.Chk_Proj_Internal,
+            dcp.Chk_Proj_Eval_Expr,
+            dcp.Chk_Proj_Eval_Type,
+            dcp.Chk_Proj_Source,
+            dcp.tnmtid
+        from data_chk_proj dcp
+        where dcp.Chk_Proj_Nm=#{chkProjNm}
+        limit 1
+    </select>
+</mapper>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.wash.dao.DataProcJobDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.wash.entity.DataProcJobEntity" id="dataProcJobMap">
+        <result property="jobid" column="Jobid"/>
+        <result property="jobStus" column="Job_Stus"/>
+        <result property="jobType" column="Job_Type"/>
+        <result property="startTm" column="Start_Tm"/>
+        <result property="rfrshTm" column="Rfrsh_Tm"/>
+        <result property="dataTblid" column="Data_Tblid"/>
+        <result property="dataStartDt" column="Data_Start_Dt"/>
+        <result property="dataTerminateDt" column="Data_Terminate_Dt"/>
+        <result property="dataSplPct" column="Data_Spl_Pct"/>
+        <result property="procRecTotalQty" column="Proc_Rec_Total_Qty"/>
+        <result property="allDuplRecQty" column="All_Dupl_Rec_Qty"/>
+        <result property="pkDuplRecQty" column="Pk_Dupl_Rec_Qty"/>
+    </resultMap>
+
+    <select id="queryTaskList" resultType="map">
+        select x.* from (
+        select jobid, t.Data_Tbl_Cn_Nm dataTblCnNm,t.Data_Tbl_Phys_Nm dataTblPhysNm,s.Data_Src_Nm dataSrcNm
+              ,j.Data_Tblid dataTblid,j.Data_Start_Dt dataStartDt, j.Data_Terminate_Dt dataTerminateDt,t.Del_Dt delDt
+              ,j.Start_Tm startTm, j.Rfrsh_Tm rfrshTm,j.Job_Stus jobStus,j.job_Type jobType,s.Data_Srcid dataSrcid
+        ,CASE WHEN t.Del_Dt = CURRENT_DATE   THEN '3' WHEN t.Create_Dt = CURRENT_DATE THEN '0' WHEN t.Upd_Dt =CURRENT_DATE THEN '1' ELSE '2' END metaStatus
+        from data_proc_job j
+        left join data_tbl t on j.Data_Tblid=t.Data_Tblid
+        left join db d on d.Dbid=t.Dbid
+        left join data_src s on t.Data_Srcid=s.Data_Srcid
+        left join data_part p on d.Partid=p.Partid
+        where d.Db_usageid = 2 and p.Tnmtid=#{m.tenantId}) x
+        where (x.delDt is null)
+        <if test="m.containsKey('dataSrcid') and m.dataSrcid != null and m.dataSrcid != ''">
+            and x.dataSrcid = #{m.dataSrcid}
+        </if>
+        <if test="m.containsKey('jobStus') and m.jobStus != null and m.jobStus != ''">
+            and x.jobStus = #{m.jobStus}
+        </if>
+        <if test="m.containsKey('jobType') and m.jobType != null and m.jobType != ''">
+            and x.jobType = #{m.jobType}
+        </if>
+        <if test="m.containsKey('keyWord') and m.keyWord != null and m.keyWord != ''">
+            and (x.dataTblCnNm like concat('%',#{m.keyWord},'%') or x.dataTblPhysNm like concat('%',#{m.keyWord},'%') )
+        </if>
+        <if test="m.containsKey('dataTblid') and m.dataTblid != null and m.dataTblid != ''">
+            and x.dataTblid in (${m.dataTblid})
+        </if>
+        <if test="m.containsKey('metaStatus') and m.metaStatus != null and m.metaStatus != ''">
+            and x.metaStatus = #{m.metaStatus}
+        </if>
+        order by x.jobid desc
+    </select>
+
+    <select id="queryPublishList" resultType="map">
+      select * from (
+      select j.Jobid, j.Job_Type jobType, j.Data_Tblid dataTblid, j.Job_Release_Date jobReleaseDate, j.Job_Exec_Status jobExecStatus
+           , j.Job_Start_Time jobStartTime, j.Job_Finish_Time jobFinishTime, t.Data_Tbl_Phys_Nm dataTblPhysNm, t.Data_Tbl_Cn_Nm dataTblCnNm
+           , s.Data_Src_Nm dataSrcNm, s.Data_Srcid dataSrcid, j.Job_Expire_Date jobRetireDate, j.Job_Expire_Date jobExpireDate, j.Job_Schedule_Type jobScheduleType
+        from prd_data_proc_job j
+   left join data_tbl t on j.Data_Tblid=t.Data_Tblid
+   left join data_src s on s.Data_Srcid=t.Data_Srcid
+   left join db d on d.Dbid=t.Dbid
+   left join data_part p on p.Partid=d.Partid
+       where p.Tnmtid=#{m.tenantId}
+    ) x
+      where 1=1
+    <if test="m.containsKey('dataSrcid') and m.dataSrcid != null and m.dataSrcid != ''">
+        and x.dataSrcid = #{m.dataSrcid}
+    </if>
+    <if test="m.containsKey('jobid') and m.jobid != null and m.jobid != ''">
+        and x.Jobid = #{m.jobid}
+    </if>
+    <if test="m.containsKey('jobExecStatus') and m.jobExecStatus != null and m.jobExecStatus != ''">
+        and x.jobExecStatus = #{m.jobExecStatus}
+    </if>
+    <if test="m.containsKey('jobType') and m.jobType != null and m.jobType != ''">
+        and x.jobType in (${m.jobType})
+    </if>
+    <if test="m.containsKey('keyWord') and m.keyWord != null and m.keyWord != ''">
+        and (x.dataTblCnNm like concat('%',#{m.keyWord},'%') or x.dataTblPhysNm like concat('%',#{m.keyWord},'%') )
+    </if>
+    <if test="m.containsKey('dataTblid') and m.dataTblid != null and m.dataTblid != ''">
+        and x.dataTblid in (${m.dataTblid})
+    </if>
+    <if test="m.containsKey('jobStartTime') and m.jobStartTime != null and m.jobStartTime != ''">
+        and x.jobStartTime like '${m.jobStartTime}%'
+    </if>
+    <if test="m.containsKey('jobReleaseDate') and m.jobReleaseDate != null and m.jobReleaseDate != ''">
+        and x.jobReleaseDate like '${m.jobReleaseDate}%'
+    </if>
+    <if test="m.containsKey('cmpuId') and m.cmpuId != null and m.cmpuId != ''">
+        and x.dataTblid in (select Data_Tblid from data_fld m1 inner join prd_data_fld_wash_proj m2 on m1.Fldid=m2.Fldid and m2.Data_Wash_Cmpuid=#{m.cmpuId})
+    </if>
+    <if test="m.containsKey('jobScheduleType') and m.jobScheduleType != null and m.jobScheduleType != ''">
+        and x.jobScheduleType =#{m.jobScheduleType}
+    </if>
+    order by x.Jobid desc
+    </select>
+
+    <delete id="deleteOldJob">
+      delete from data_proc_job
+        where Job_Stus in ('FAILED','DONE')
+          and Data_Tblid in
+        <foreach collection="ids" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateDelPublish">
+        update prd_data_proc_job set Job_Expire_Date=NOW() where Data_Tblid=#{tableid} and Job_Type=1
+    </update>
+
+    <update id="updateRePublish">
+        update prd_data_proc_job set Job_Expire_Date=null,Job_Release_Date=NOW(),Job_Schedule_Type=#{scheduleType} where Data_Tblid=#{tableid} and Job_Type=1
+    </update>
+
+    <!--获取表的规则信息 Start-->
+    <select id="queryTblRule" resultMap="queryTblRuleMap">
+        SELECT f.Fldid fldid,f.Fld_Phys_Nm fldPsyName,f.Fld_Cn_Nm fldCName, #{tbl.dataSrcNm} dataSrcNm,f.If_Pk fldKey,f.If_Can_Null fldNull
+        ,(CASE WHEN f.Del_Dt = CURRENT_DATE   THEN '3' WHEN f.Create_Dt = CURRENT_DATE THEN '0' WHEN f.Upd_Dt =CURRENT_DATE THEN '1' ELSE '2' END ) metaStatus,f.Upd_Dt updDt
+        , det.Data_Expl_Tmplid dataExplTmplid,deps.Data_Expl_Tmpl_Nm dataExplTmplNm,a1.explProRate,a1.chkProjNm
+        from data_fld f
+        LEFT JOIN (select max(Data_Expl_Tmplid) Data_Expl_Tmplid, Fldid from data_fld_expl_proj group by Fldid) dfep ON f.Fldid = dfep.Fldid
+        LEFT JOIN  data_expl_tmpl det ON det.Data_Expl_Tmplid = dfep.Data_Expl_Tmplid
+        LEFT JOIN (select group_concat(Data_Expl_Tmpl_Nm) Data_Expl_Tmpl_Nm, d.fldid from data_expl_tmpl t left join data_fld_expl_proj d on t.Data_Expl_Tmplid=d.Data_Expl_Tmplid group by d.fldid) deps on deps.fldid=f.Fldid
+        LEFT JOIN (
+        select Fldid,group_concat(x.Chk_Proj_Nm,x.explProRate separator ',')  chkProjNm, CONCAT(round(avg(x.explProRate),2),'%') explProRate
+        from (
+        select distinct dfep.Fldid,dcp.Chk_Proj_Nm,fer.Isu_Rec_Qty,dpj.Proc_Rec_Total_Qty, CONCAT(round(fer.Isu_Rec_Qty/dpj.Proc_Rec_Total_Qty*100,2),'%') explProRate
+        from data_expl_tmpl_proj detp
+        left join data_fld_expl_proj dfep on dfep.Data_Expl_Tmplid=detp.Data_Expl_Tmplid
+        left join data_chk_proj dcp on dcp.Chk_Projid=detp.Chk_Projid
+        left join data_fld f on f.Fldid=dfep.Fldid
+        left join (select max(Jobid) Jobid,Data_Tblid from data_proc_job where Job_Stus='DONE' and Job_Type='0' group by Data_Tblid) dpj1 ON dpj1.Data_Tblid=f.Data_Tblid
+        left join data_proc_job dpj on dpj.Jobid=dpj1.Jobid
+        left join fld_expl_result fer on fer.Chk_Projid=dcp.Chk_Projid and fer.Jobid=dpj.Jobid and fer.Fldid=f.Fldid
+        ) x group by (x.Fldid)
+        ) a1 on a1.Fldid=f.Fldid
+        where 1=1
+        <if test="tbl.containsKey('dataTblid') and tbl.dataTblid != null and tbl.dataTblid != ''">
+            and f.Data_Tblid = #{tbl.dataTblid}
+        </if>
+        order by f.Fld_Ord asc,f.Fldid asc
+    </select>
+    <resultMap id="queryTblRuleMap" type="io.dfjinxin.modules.wash.dto.FieldRuleDto">
+        <result property="fldid" column="fldid" />
+        <association property="washList" javaType="List" column="fldid" select="queryTblRuleProj"/>
+    </resultMap>
+    <select id="queryTblRuleProj" parameterType="int" resultType="io.dfjinxin.modules.wash.entity.DataFldWashProjEntity">
+        SELECT a.Fldid fldid, a.Data_Wash_Cmpuid dataWashCmpuid, a.Exct_Ord exctOrd, a.Paraid paraid FROM data_fld_wash_proj a left join data_wash_cmpu b on a.Data_Wash_Cmpuid=b.Data_Wash_Cmpuid
+         where a.Fldid = #{fldid} and b.Data_Wash_Cmpu_Type='0' order by Exct_Ord,Fldid
+    </select>
+    <select id="queryFldCheckProj" parameterType="int" resultType="java.lang.Integer">
+        select Data_Expl_tmplid from data_fld_expl_proj where Fldid = #{fldid}
+    </select>
+    <!--获取表的规则信息 End-->
+    <!--清洗规则数据-->
+    <select id="getWashRules" resultType="map">
+        SELECT dwc.Data_Wash_Cmpuid dataWashCmpuid,dwc.Data_Wash_Cmpu_Nm dataWashCmpuNm,dwc.Data_Wash_Cmpu_Desc dataWashCmpuDesc FROM data_wash_cmpu dwc where 1=1
+        <if test="m.containsKey('dataWashCmpuType') and m.dataWashCmpuType != null and m.dataWashCmpuType != ''">
+            and dwc.Data_Wash_Cmpu_Type = #{m.dataWashCmpuType}
+        </if>
+    </select>
+    <!--获取发布清洗规则信息 Start-->
+    <select id="queryTaskRule" resultMap="queryTaskRuleMap">
+        SELECT f.Fldid fldid,f.Fld_Phys_Nm fldPsyName,f.Fld_Cn_Nm fldCName, #{tbl.dataSrcNm} dataSrcNm,f.If_Pk fldKey,f.If_Can_Null fldNull
+        ,(CASE WHEN f.Del_Dt = CURRENT_DATE   THEN '3' WHEN f.Create_Dt = CURRENT_DATE THEN '0' WHEN f.Upd_Dt =CURRENT_DATE THEN '1' ELSE '2' END) metaStatus,f.Upd_Dt updDt
+        , det.Data_Expl_Tmplid dataExplTmplid,deps.Data_Expl_Tmpl_Nm dataExplTmplNm,a1.explProRate,a1.chkProjNm
+        from data_fld f
+        LEFT JOIN (select max(Data_Expl_Tmplid) Data_Expl_Tmplid, Fldid from data_fld_expl_proj group by Fldid) dfep ON f.Fldid = dfep.Fldid
+        LEFT JOIN  data_expl_tmpl det ON det.Data_Expl_Tmplid = dfep.Data_Expl_Tmplid
+        LEFT JOIN (select group_concat(Data_Expl_Tmpl_Nm) Data_Expl_Tmpl_Nm, d.fldid from data_expl_tmpl t left join data_fld_expl_proj d on t.Data_Expl_Tmplid=d.Data_Expl_Tmplid group by d.fldid) deps on deps.fldid=f.Fldid
+        LEFT JOIN (
+        select distinct Fldid,group_concat(x.Chk_Proj_Nm,x.explProRate separator ',')  chkProjNm, CONCAT(round(avg(x.explProRate),2),'%') explProRate
+        from (
+        select dfep.Fldid,dcp.Chk_Proj_Nm,fer.Isu_Rec_Qty,dpj.Proc_Rec_Total_Qty, CONCAT(round(fer.Isu_Rec_Qty/dpj.Proc_Rec_Total_Qty*100,2),'%') explProRate
+        from data_expl_tmpl_proj detp
+        left join data_fld_expl_proj dfep on dfep.Data_Expl_Tmplid=detp.Data_Expl_Tmplid
+        left join data_chk_proj dcp on dcp.Chk_Projid=detp.Chk_Projid
+        left join data_fld f on f.Fldid=dfep.Fldid
+        left join (select max(Jobid) Jobid,Data_Tblid from data_proc_job where Job_Stus='DONE' and Job_Type='0' group by Data_Tblid) dpj1 ON dpj1.Data_Tblid=f.Data_Tblid
+        left join data_proc_job dpj on dpj.Jobid=dpj1.Jobid
+        left join fld_expl_result fer on fer.Chk_Projid=dcp.Chk_Projid and fer.Jobid=dpj.Jobid and fer.Fldid=f.Fldid
+        ) x group by (x.Fldid)
+        ) a1 on a1.Fldid=f.Fldid
+        where 1=1
+        <if test="tbl.containsKey('dataTblid') and tbl.dataTblid != null and tbl.dataTblid != ''">
+            and f.Data_Tblid = #{tbl.dataTblid}
+        </if>
+        order by f.Fld_Ord asc,f.Fldid asc
+    </select>
+    <resultMap id="queryTaskRuleMap" type="io.dfjinxin.modules.wash.dto.FieldRuleDto">
+        <result property="fldid" column="fldid" />
+        <association property="washList" javaType="List" column="fldid" select="queryTaskRuleProj"/>
+    </resultMap>
+    <select id="queryTaskRuleProj" parameterType="int" resultType="io.dfjinxin.modules.wash.entity.DataFldWashProjEntity">
+        SELECT Fldid fldid, Data_Wash_Cmpuid dataWashCmpuid, Exct_Ord exctOrd, Paraid paraid FROM prd_data_fld_wash_proj where Fldid = #{fldid} order by Exct_Ord,Fldid
+    </select>
+    <!--获取表的规则信息 End-->
+</mapper>

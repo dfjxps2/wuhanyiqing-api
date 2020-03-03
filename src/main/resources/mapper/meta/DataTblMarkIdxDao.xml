@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.meta.dao.DataTblMarkIdxDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.meta.entity.DataTblMarkIdxEntity" id="dataTblMarkIdxMap">
+        <result property="dataTblid" column="Data_Tblid"/>
+        <result property="labelid" column="Labelid"/>
+        <result property="markIdxType" column="Mark_Idx_Type"/>
+    </resultMap>
+
+    <!--查询元数据视图   行转列-->
+    <select id="queryDataTblMarkIdx" resultType="java.util.Map" parameterType="java.util.Map">
+        select
+        tmpTable.Data_Tblid,
+        tmpTable.Data_Tbl_Cn_Nm,
+        tmpTable.Data_Tbl_Phys_Nm,
+        tmpTable.Partid,
+        tmpTable.label,
+        tmpTable.Dbid,
+        tmpTable.Db_Cn_Nm
+        from (
+        select
+        dt.Data_Tblid,
+        dt.Data_Tbl_Cn_Nm,
+        dt.Data_Tbl_Phys_Nm,
+        db.Partid,
+        db.Dbid,
+        db.Db_Cn_Nm,
+        GROUP_CONCAT(concat_ws(':',l.Label_Nm,l.Labelid,l.Label_Catgid,lc.Label_Catg_Nm)) label
+        from data_tbl dt
+        left join data_tbl_mark_idx dtmi on dt.Data_Tblid = dtmi.Data_Tblid
+        left join label l on dtmi.labelid = l.Labelid
+        LEFT JOIN label_catg lc on l.Label_Catgid = lc.Label_Catgid
+        LEFT JOIN db db ON dt.Dbid = db.Dbid
+        left join db_usage du on db.Db_UsageId = du.Db_UsageId
+        <include refid="dataTblMarkIdxWhere"></include>
+        group by dt.Data_Tblid
+        ) tmpTable
+        <if test="param.dataLabelid != null and param.dataLabelid != '' and param.dataLabelid!=-1 ">
+            LEFT JOIN data_tbl_mark_idx t on tmpTable.Data_Tblid = t.Data_Tblid WHERE t.Labelid = #{param.dataLabelid}
+        </if>
+        ORDER BY tmpTable.Data_Tbl_Cn_Nm DESC
+    </select>
+
+
+
+    <!--批量增加表标签-->
+    <insert id="batchSaveTblLabel" parameterType="java.util.List">
+        insert into data_tbl_mark_idx (Data_Tblid,Labelid,Mark_Idx_Type)
+        values
+        <foreach collection="labelList" item="item" index="index" separator=",">
+            (
+            #{dataTblId},
+            #{item},
+            '1'
+            )
+        </foreach>
+    </insert>
+
+    <!--批量删除表标签-->
+    <delete id="batchDeleteTblLabel" parameterType="java.util.List">
+        delete from data_tbl_mark_idx where Data_Tblid = #{dataTblId}
+        and Labelid in
+        <foreach item="labelId" collection="labelList" open="(" separator="," close=")">
+            #{labelId}
+        </foreach>
+    </delete>
+
+
+    <!-- 条件查询 -->
+    <sql id="dataTblMarkIdxWhere">
+        <where>
+            dt.Del_Dt is NULL
+            and (du.Db_Usage_Cd = '02' or du.Db_Usage_Cd = '07' or du.Db_Usage_Cd = '08')
+            <!-- 表名称(支持中英文) -->
+            <if test="param.dataTableName != null and param.dataTableName!= ''">
+                AND (dt.Data_Tbl_Cn_Nm like CONCAT('%', #{param.dataTableName}, '%')
+                OR dt.Data_Tbl_Phys_Nm like CONCAT('%', #{param.dataTableName}, '%'))
+            </if>
+            <!-- 表标签 1已设置，2未设置。-->
+            <if test="param.flag != null and param.flag != '' and param.flag == 1">
+                AND dt.Data_Tblid  in (select Data_Tblid from data_tbl_mark_idx)
+            </if>
+            <if test="param.flag != null and param.flag != '' and param.flag == 2">
+                AND dt.Data_Tblid  not in (select Data_Tblid from data_tbl_mark_idx)
+            </if>
+            <if test="param.dbid != null and param.dbid !=''">
+                AND db.dbid = #{param.dbid}
+            </if>
+            <!-- 查询数据库db-->
+                AND db.Partid = #{param.partid}
+        </where>
+    </sql>
+
+
+    <!--查询标签被未删除表标引次数 add by zhc 7.22-->
+    <select id="selectLabelUsedTimesByTable" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM data_tbl_mark_idx dtmi
+        left join data_tbl dt on dtmi.Data_Tblid=dt.Data_Tblid
+        WHERE dtmi.Labelid=#{labelId}
+        and dt.Del_Dt is null
+    </select>
+
+    <select id="selectLabelUsedTimesByLabelIds" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM data_tbl_mark_idx dtmi
+        left join data_tbl dt on dtmi.Data_Tblid=dt.Data_Tblid
+        WHERE dt.Del_Dt is null
+        and dtmi.labelId in
+        <foreach item="labelId" collection="labelIds" open="(" separator="," close=")">
+            #{labelId}
+        </foreach>
+    </select>
+
+
+</mapper>

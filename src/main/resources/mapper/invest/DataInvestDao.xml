@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.invest.dao.DataInvestDao">
+
+    <!-- 表信息 -->
+    <resultMap type="io.dfjinxin.modules.invest.entity.DataInvestEntity" id="dataInvestMap">
+        <result property="dataTblid" column="Data_Tblid"/>
+        <result property="dataTblPhysNm" column="Data_Tbl_Phys_Nm"/>
+        <result property="updDt" column="Upd_Dt"/>
+        <result property="dataTblCnNm" column="Data_Tbl_Cn_Nm"/>
+        <result property="dbid" column="Dbid"/>
+        <result property="dataSrcId" column="Data_Srcid"/>
+        <result property="dataSrcNa" column="Data_Src_Nm"/>
+        <result property="tableKeys" column="Data_Tbl_Desc"/>
+        <result property="metaStatus" column="Data_St"/>
+        <result property="incrOrFull" column="Incr_Or_Full"/>
+        <result property="variableNm" column="Variable_Name"/>
+        <result property="loadFreq" column="Load_Freq" />
+        <result property="dbUsageid" column="Db_usageid"/>
+    </resultMap>
+
+    <!-- 字段信息 -->
+    <resultMap type="io.dfjinxin.modules.invest.entity.TableFldEntity" id="tableFldMap">
+        <result property="fldId" column="Fldid"/>
+        <result property="fldCName" column="Fld_Cn_Nm"/>
+        <result property="fldPsyName" column="Fld_Phys_Nm"/>
+        <result property="dataSrcNm" column="Data_Src_Nm"/>
+        <result property="fldKey" column="If_Pk"/>
+        <result property="fldNull" column="If_Can_Null"/>
+        <result property="metaStatus" column="Data_St"/>
+        <result property="uptDt" column="Upd_Dt"/>
+        <result property="dbId" column="Dbid"/>
+        <result property="fldDataType" column="Fld_Data_Type"/>
+        <result property="dataExplTmplid" column="Data_Expl_Tmplid"/>
+        <result property="dataExplTmplNm" column="Data_Expl_Tmpl_Nm"/>
+    </resultMap>
+
+    <select id="queryInvestList" resultMap="dataInvestMap">
+        SELECT dt.Data_Tbl_Cn_Nm,dt.Data_Tbl_Phys_Nm,dt.Upd_Dt, (CASE WHEN dt.metaStatus = 2 THEN '未变化' WHEN dt.metaStatus = 1 THEN '变化' WHEN dt.metaStatus = 0 THEN '新增'WHEN dt.metaStatus = 3 THEN '删除' END ) AS Data_St,dt.Data_Srcid,dt.Data_Tblid,(CASE WHEN dt.Incr_Or_Full = 0 THEN '全量' WHEN dt.Incr_Or_Full = 1 THEN '增量' ELSE '未指定' END) AS Variable_Name, dt.Incr_Or_Full,dr.Data_Src_Nm,ds.Tnmtid,
+        dt.Load_Freq, ds.Db_usageid FROM (
+        SELECT wdt.Data_Tbl_Cn_Nm,wdt.Data_Tbl_Phys_Nm,wdt.Upd_Dt,wdt.Data_Tbl_Desc,wdt.Dbid, wdt.Data_Srcid, wdt.Data_Tblid, wdt.Incr_Or_Full,(CASE WHEN wdt.Del_Dt = CURRENT_DATE   THEN '3' WHEN wdt.Create_Dt = CURRENT_DATE THEN '0' WHEN wdt.Upd_Dt =CURRENT_DATE THEN '1' ELSE '2' END) metaStatus,wdt.Load_Freq   FROM data_tbl wdt WHERE  wdt.Del_Dt IS  NULL OR wdt.Del_Dt = CURRENT_DATE
+        ) dt LEFT JOIN (SELECT d.Dbid,dt.Tnmtid, d.Db_usageid FROM db d  JOIN data_part dt ON d.Partid = dt.Partid
+       ) ds  ON  dt.Dbid = ds.Dbid
+        LEFT JOIN   data_src dr ON dt.Data_Srcid = dr.Data_Srcid WHERE  Tnmtid = #{tps.tenantId}
+        <if test="tps.containsKey('metaStatus') and tps.metaStatus != null and tps.metaStatus != ''">
+            AND dt.metaStatus = #{tps.metaStatus}
+        </if>
+        <if test="tps.containsKey('dataSrcId') and tps.dataSrcId != null and tps.dataSrcId != ''">
+            AND dt.Data_Srcid = #{tps.dataSrcId}
+        </if>
+        <if test="tps.containsKey('dbid') and tps.dbid != null and tps.dbid != '' and tps.dbid !='all'">
+            AND dt.Dbid = #{tps.dbid}
+        </if>
+        <if test="tps.containsKey('tableKeys') and tps.tableKeys != null and tps.tableKeys != ''">
+            AND  ( dt.Data_Tbl_Cn_Nm LIKE concat('%',#{tps.tableKeys},'%') OR dt.Data_Tbl_Phys_Nm LIKE concat('%',#{tps.tableKeys},'%'))
+        </if>
+        <if test="tps.containsKey('tmplid') and tps.tmplid != null and tps.tmplid != '' and tps.tmplid !='all'">
+            AND dt.Data_Tblid in (select Data_Tblid from data_fld f left join data_fld_expl_proj e on f.Fldid=e.Fldid where e.Data_Expl_Tmplid=#{tps.tmplid})
+        </if>
+        ORDER BY dt.metaStatus,dt.Data_Tbl_Cn_Nm DESC
+    </select>
+
+     <!--数据源下拉框-->
+    <select id="queryResources" resultType="java.util.HashMap">
+        SELECT DISTINCT dt.Data_Srcid dataSrcId,dt.Data_Src_Nm dataSrcNa   FROM  data_src dt
+    </select>
+
+    <!--表字段信息-->
+    <select id="queryTblFld"  resultType="java.util.HashMap">
+        select fld.Fldid fldId,fld.Fld_Cn_Nm fldCName,fld.Fld_Phys_Nm fldPsyName,fld.If_Pk fldKey,fld.If_Can_Null fldNull,fld.Fld_Data_Type fldDataType,(CASE WHEN fld.metaStatus = 2 THEN '未变化' WHEN fld.metaStatus = 1 THEN '变化' WHEN fld.metaStatus = 0 THEN '新增'WHEN fld.metaStatus = 3 THEN '删除' END  )  as metaStatus,fld.Upd_Dt uptDt from (
+        select df.Fldid,df.Fld_Phys_Nm,df.Fld_Cn_Nm,df.If_Pk,df.If_Can_Null,df.Upd_Dt,df.Fld_Data_Type,
+        (CASE WHEN df.Del_Dt = CURRENT_DATE THEN '3' WHEN df.Create_Dt = CURRENT_DATE THEN '0' WHEN df.Upd_Dt = CURRENT_DATE THEN '1'ELSE '2'END ) metaStatus ,df.Fld_Ord fldOrd from data_fld df where df.Data_Tblid = ${tps.dataTblId} AND (df.Del_Dt IS  NULL OR df.Del_Dt = CURRENT_DATE)
+        ) fld WHERE 1=1
+        <if test="tps.containsKey('metaStatus') and tps.metaStatus != null and tps.metaStatus != ''">
+            and fld.metaStatus = #{tps.metaStatus}
+        </if>
+        <if test="tps.containsKey('fldCName') and tps.fldCName != null and tps.fldCName != ''">
+            and (fld.Fld_Cn_Nm = #{tps.fldCName} or fld.Fld_Phys_Nm = #{tps.fldCName})
+        </if>
+        ORDER BY  fld.fldOrd
+    </select>
+
+    <!--获取字段模板信息-->
+    <select id="queryTempl" resultType="map">
+        select dp.Fldid fld,dp.Data_Expl_Tmplid dataExplTmplid,de.Data_Expl_Tmpl_Nm dataExplTmplNm from data_expl_tmpl de  join data_fld_expl_proj dp on de.Data_Expl_Tmplid = dp.Data_Expl_Tmplid
+    </select>
+
+    <!--获取字段对应的清洗规则Id-->
+    <select id="getCmpuIds" parameterType="java.lang.Integer" resultType="java.lang.Integer" >
+       SELECT  dcp.Data_Wash_Cmpuid FROM data_expl_tmpl_proj detp  JOIN data_chk_proj dcp  ON detp.Chk_Projid = dcp.Chk_Projid WHERE 1=1
+        <if test="entity != null">
+            and detp.Data_Expl_Tmplid = #{entity}
+        </if>
+    </select>
+
+    <!--字段清洗规则批量插入 数据字段清洗项目表-->
+    <insert id="insertFldWashProj" parameterType="java.util.List">
+        INSERT  INTO  data_fld_wash_proj (Fldid,Data_Wash_Cmpuid,Exct_Ord) VALUES
+        <foreach collection="list" item="entity"  separator=",">
+            (#{entity.fid},#{entity.dataWashCm},#{entity.exctOrd})
+        </foreach>
+    </insert>
+
+    <!--获取一个表的所有字段名称-->
+    <select id="getTblFlds" resultType="java.util.HashMap">
+        SELECT DISTINCT df.Fldid fldId,CASE WHEN df.Fld_Cn_Nm IS NULL THEN df.Fld_Phys_Nm ELSE df.Fld_Cn_Nm END fldCName FROM data_fld df WHERE df.Data_Tblid = #{tid.dataTblId} AND (df.Del_Dt IS  NULL OR df.Del_Dt = CURRENT_DATE)  ORDER  BY  df.Fld_Ord
+    </select>
+
+    <!--表字段批量保存-->
+    <update id="saveTableFlds" >
+        <if test="list!=null">
+            UPDATE data_fld
+            SET
+            If_Pk = #{fldKey},
+            If_Can_Null = #{fldNull}
+            WHERE  Fldid  IN
+            <foreach collection="list" item="entity" open="(" close=")" separator=",">
+                  #{entity}
+            </foreach>
+        </if>
+    </update>
+
+    <!--字段批量保存;删除模板信息-->
+    <delete id="deleFldsTmpl" >
+        DELETE FROM  data_fld_expl_proj WHERE  Fldid = #{entity}
+    </delete>
+
+    <!--获取租户可以查看的数据库信息-->
+    <select id="getDbDatas" resultType="map">
+      SELECT d.Dbid dbid,d.Db_Cn_Nm dbCnNm FROM (
+	  SELECT dp.Partid,dp.Part_Typeid ,t.Tnmtid FROM tnmt t  JOIN data_part dp ON t.Tnmtid = dp.Tnmtid WHERE dp.Part_Typeid in ('1','3')) dpo
+      JOIN db d ON d.Partid = dpo.Partid 	WHERE dpo.Tnmtid = #{param.tenantId}
+    </select>
+
+    <!--字段批量保存，插入新的数据-->
+    <insert id="insertFldTmpl" parameterType="java.util.List">
+        INSERT  INTO data_fld_expl_proj (Fldid,Data_Expl_Tmplid,Proj_Type)
+        VALUES
+        <foreach collection="list" item="entity"  separator=",">
+            (#{entity.fid},#{entity.tmplId},#{entity.projType})
+        </foreach>
+    </insert>
+
+
+
+    <!--字段保存-->
+    <update id="saveFlds" parameterType="java.util.HashMap">
+        UPDATE data_fld
+            SET
+            If_Pk = #{fld.fldKey},
+            If_Can_Null = #{fld.fldNull}
+            WHERE  Fldid = #{fld.fldId}
+    </update>
+
+    <!--表信息保存-->
+    <update id="saveTables" parameterType="io.dfjinxin.modules.invest.entity.DataInvestEntity">
+                UPDATE data_tbl
+                 SET
+                  Data_Srcid  = #{entity.dataSrcId},
+                  Incr_Or_Full = #{entity.incrOrFull}
+                 WHERE
+                    Data_Tblid = #{entity.dataTblid}
+    </update>
+
+    <!--字段所有探查模板-->
+    <select id="getExplTempls" resultType="java.util.HashMap">
+       SELECT det.Data_Expl_Tmplid dataExplTmplid,det.Data_Expl_Tmpl_Nm dataExplTmplNm  FROM data_expl_tmpl det WHERE det.Tnmtid = #{tem.tenantId}
+    </select>
+
+    <!--获取表的规则信息-->
+    <select id="getTblRule" resultType="java.util.HashMap">
+    SELECT dr.Fldid fldId,dr.Fld_Phys_Nm fldPsyName,dr.Fld_Cn_Nm fldCName,dr.dataSrcNm,dr.If_Pk fldKey,dr.If_Can_Null fldNull,dr.metaStatus,dr.Upd_Dt uptDt , det.Data_Expl_Tmplid dataExplTmplid,det.Data_Expl_Tmpl_Nm dataExplTmplNm, CONCAT(round(fer.Isu_Rec_Qty/dr.Proc_Rec_Total_Qty*100,2),'%') explProRate ,dcp.Chk_Proj_Nm chkProjNm,dwc.Data_Wash_Cmpuid dataWashCmpuid,dwc.Data_Wash_Cmpu_Nm dataWashCmpuNm  from
+	(SELECT df.Fldid,df.Fld_Phys_Nm,df.Fld_Cn_Nm,df.If_Pk,df.If_Can_Null, #{tbl.dataSrcNm} AS dataSrcNm,df.Upd_Dt,(CASE WHEN df.Del_Dt > df.Upd_Dt  THEN '2' WHEN df.Upd_Dt > df.Create_Dt THEN '1' ELSE '0' END ) metaStatus,(select dpj.Proc_Rec_Total_Qty from data_proc_job dpj where dpj.Data_Tblid = #{tbl.dataTblid}) Proc_Rec_Total_Qty,df.Fld_Ord fldOrd from data_fld df where df.Data_Tblid = #{tbl.dataTblid}) dr
+	LEFT JOIN data_fld_expl_proj dfep ON dr.Fldid = dfep.Fldid
+	LEFT JOIN  data_expl_tmpl det ON det.Data_Expl_Tmplid = dfep.Data_Expl_Tmplid
+	LEFT JOIN  fld_expl_result fer ON dr.Fldid = fer.Fldid
+    LEFT JOIN  data_fld_wash_proj fwr ON dr.Fldid = fwr.Fldid
+    LEFT JOIN  data_chk_proj  dcp ON fwr.Chk_Projid = dcp.Chk_Projid
+    LEFT JOIN  data_wash_cmpu dwc ON fwr.Data_Wash_Cmpuid = dwc.Data_Wash_Cmpuid
+    </select>
+
+    <!--查询字段ID 和字段顺序的差值-->
+     <select id="getMargin" resultType="java.lang.String">
+         SELECT   (df.Fldid - df.Fld_Ord) margin  FROM  data_fld df WHERE df.Data_Tblid = #{tblId.dataTblId}  and df.Fld_Ord = '1'
+     </select>
+
+    <!--清洗规则数据-->
+    <select id="getWashRules" resultType="java.util.HashMap">
+        SELECT dwc.Data_Wash_Cmpuid dataWashCmpuid,dwc.Data_Wash_Cmpu_Nm dataWashCmpuNm,dwc.Data_Wash_Cmpu_Desc dataWashCmpuDesc FROM data_wash_cmpu dwc
+    </select>
+
+    <!--得到指定字段对应的清洗规则-->
+    <select id ="getFldRules" parameterType="java.util.HashMap" >
+        <if test="list!=null">
+        SELECT dfwp.Fldid fldid ,dfwp.Data_Wash_Cmpuid  dataWashCmpuid,dfwp.Chk_Projid chkProjid,dfwp.Exct_Ord exctOrd, dfwp.Paraid paraid   FROM data_fld_wash_proj dfwp where dfwp.Fild IN
+            <foreach collection="list" item="entity" open="(" close=")" separator=",">
+                #{entity}
+            </foreach>
+        </if>
+    </select>
+
+      <!--字段规则删除-->
+    <delete id="deleteFldCumId">
+        DELETE FROM  data_fld_wash_proj  WHERE  Fldid = #{entity}
+    </delete>
+
+    <!--字段规则新增-->
+    <insert id="insertFldRule" parameterType="java.util.HashMap">
+        INSERT  INTO  data_fld_wash_proj
+        (Fldid  ,Data_Wash_Cmpuid  ,Chk_Projid ,Exct_Ord , Paraid)
+        VALUES (#{entity.fldid},#{entity.dataWashCmpuid},,#{entity.chkProjid},#{entity.exctOrd},#{entity.paraid})
+    </insert>
+
+    <!--表信息批量更新-->
+    <update id="batchSaveTables" >
+        <if test="list!=null">
+        UPDATE data_tbl
+           SET
+            Data_Srcid = #{dataSrcId},Incr_Or_Full = #{incrOrFull}
+           WHERE Data_Tblid IN
+        <foreach collection="list" item="entity" open="(" close=")" separator=",">
+                 #{entity}
+        </foreach>
+        </if>
+    </update>
+
+    <!--获取需要进行模板匹配的所有表字段-->
+    <select id="getFieldByIds"  resultType="java.util.HashMap">
+        SELECT  df.Fldid fldId, df.Fld_Cn_Nm fldCnNm,df.Fld_Phys_Nm fldPhysNm  FROM data_fld df WHERE  Data_Tblid IN
+        <foreach item='item' index='index' collection='tablIds' open='(' separator=',' close=')'>
+            #{item}
+        </foreach>
+    </select>
+
+    <!--获取字段的匹配规则-->
+    <select id="getMarkRules" resultType="java.util.HashMap">
+        SELECT etamr.*   FROM  expl_tmpl_auto_match_rule etamr WHERE  etamr.Tnmtid = #{tenId.tenantId}
+    </select>
+
+     <!--查询元数据更新的最新作业状态-->
+    <select id="getJobStatus" resultType="java.util.HashMap">
+      SELECT dpj.Job_Stus jobStat,dpj.Start_Tm startTm,dpj.Rfrsh_Tm rfrshTm  FROM  data_proc_job  dpj  WHERE dpj.Job_Type = '3' ORDER BY dpj.Start_Tm DESC LIMIT 1
+    </select>
+
+
+</mapper>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.wash.dao.DataFldWashProjDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.wash.entity.DataFldWashProjEntity" id="dataFldWashProjMap">
+        <result property="fldid" column="Fldid"/>
+        <result property="dataWashCmpuid" column="Data_Wash_Cmpuid"/>
+        <result property="chkProjid" column="Chk_Projid"/>
+        <result property="exctOrd" column="Exct_Ord"/>
+        <result property="paraid" column="Paraid"/>
+    </resultMap>
+
+
+</mapper>

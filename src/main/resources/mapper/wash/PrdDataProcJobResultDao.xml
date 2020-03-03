@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.wash.dao.PrdDataProcJobResultDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.wash.entity.PrdDataProcJobResultEntity" id="prdDataProcJobResultMap">
+        <result property="jobid" column="Jobid"/>
+        <result property="jobExecDate" column="Job_Exec_Date"/>
+        <result property="procRecTotalQty" column="Proc_Rec_Total_Qty"/>
+        <result property="allDuplRecQty" column="All_Dupl_Rec_Qty"/>
+        <result property="pkDuplRecQty" column="Pk_Dupl_Rec_Qty"/>
+    </resultMap>
+
+
+</mapper>

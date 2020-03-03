@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.meta.dao.DataFldDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.meta.entity.DataFldEntity" id="dataFldMap">
+        <result property="fldid" column="Fldid"/>
+        <result property="dataTblid" column="Data_Tblid"/>
+        <result property="fldPhysNm" column="Fld_Phys_Nm"/>
+        <result property="fldCnNm" column="Fld_Cn_Nm"/>
+        <result property="fldDataType" column="Fld_Data_Type"/>
+        <result property="fldDesc" column="Fld_Desc"/>
+        <result property="fldOrd" column="Fld_Ord"/>
+        <result property="ifPk" column="If_Pk"/>
+        <result property="ifCanNull" column="If_Can_Null"/>
+        <result property="createDt" column="Create_Dt"/>
+        <result property="updDt" column="Upd_Dt"/>
+        <result property="delDt" column="Del_Dt"/>
+        <result property="dataTblPhysNm" column="Data_Tbl_Phys_Nm"/>
+        <result property="dataTblCnNm" column="Data_Tbl_Cn_Nm"/>
+        <result property="dbCnNm" column="Db_Cn_Nm"/>
+    </resultMap>
+
+    <select id="getFldsCountPageByDataTblId" parameterType="io.dfjinxin.modules.storage.dto.DesenForm"
+            resultType="java.lang.Integer">
+        select count(df.Fldid)
+        from data_fld df
+        left join data_tbl dt on df.Data_Tblid = dt.Data_Tblid
+        left join db db on dt.dbid = db.Dbid
+        left join db_usage du on db.Db_Usageid=du.Db_UsageId
+        where du.db_usage_cd in('02','07','08')
+        and df.Data_Tblid in
+        <foreach collection="param.tblIds" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getFldsListPageByDataTblId" parameterType="io.dfjinxin.modules.storage.dto.DesenForm"
+            resultMap="dataFldMap">
+        select
+        df.Fldid,
+        df.Data_Tblid,
+        df.Fld_Phys_Nm,
+        df.Fld_Cn_Nm,
+        df.fld_ord,
+        dt.Data_Tbl_Phys_Nm,
+        dt.Data_Tbl_Cn_Nm,
+        db.Db_Cn_Nm
+        from data_fld df
+        left join data_tbl dt on df.Data_Tblid = dt.Data_Tblid
+        left join db db on dt.dbid = db.Dbid
+        left join db_usage du on db.Db_Usageid=du.Db_UsageId
+        where du.db_usage_cd in('02','07','08')
+        and df.Data_Tblid in
+        <foreach collection="param.tblIds" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        <!-- order by df.fld_ord asc-->
+        order by db.Dbid asc, df.fld_ord asc
+        LIMIT #{param.start}, #{param.pageSize}
+    </select>
+
+    <!--    根据分区、表标签、字段标签查询已使用该标签的数量 add by zhc 6.28-->
+    <select id="queryDataFldMarkIdxCount" resultType="java.lang.Integer">
+
+        select count(DISTINCT CONCAT('fld_',dfmi.fldid,'_',dfmi.labelid))
+        from data_fld_mark_idx dfmi
+        LEFT JOIN data_fld df on df.Fldid = dfmi.Fldid
+        LEFT JOIN data_tbl dt on df.Data_Tblid = dt.Data_Tblid
+        LEFT JOIN db ON db.Dbid=dt.dbid
+        left join db_usage du on db.Db_Usageid= du.Db_UsageId
+        LEFT JOIN label lb on dfmi.Labelid = lb.Labelid
+        LEFT JOIN data_tbl_mark_idx dx on dx.Data_Tblid=dt.Data_Tblid
+        WHERE 1= 1
+        and db.Partid=#{param.partid}
+        and dt.Del_Dt is null
+        and du.db_usage_cd in('02','07','08')
+        <if test="param.labelId!=null and param.labelId!=''>0">
+            and lb.labelId =#{param.labelId}
+        </if>
+        <if test="param.tableMarks!=null and param.tableMarks.length>0">
+            and lb.Label_Catgid in
+            <foreach collection="param.tableMarks"  separator="," open="(" close=")" index="index" item="item">
+                #{item}
+            </foreach>
+        </if>
+        <if test="param.fieldMarks!=null and param.fieldMarks.length>0">
+            and dfmi.Labelid in
+            <foreach collection="param.fieldMarks"  separator="," open="(" close=")" index="index" item="item">
+                #{item}
+            </foreach>
+        </if>
+        <if test="param.dbId != null ">
+            and db.dbId=#{param.dbId}
+        </if>
+
+    </select>
+
+    <!--    根据分区、表标签、字段标签查询已使用该标签的字段列表 add by zhc 6.28-->
+    <select id="queryDataFldMarkIdxList" resultMap="dataFldMap">
+        select
+        DISTINCT CONCAT('fld_',dfmi.fldid,'_',dfmi.labelid) as temp ,
+        df.Fldid,
+        dt.Data_Tbl_Cn_Nm,
+        dt.Data_Tbl_Phys_Nm,
+        df.Fld_Cn_Nm,
+        df.fld_ord,
+        df.Fld_Phys_Nm,
+        db.Db_Cn_Nm
+        from data_fld_mark_idx dfmi
+        LEFT JOIN data_fld df on df.Fldid = dfmi.Fldid
+        LEFT JOIN data_tbl dt on df.Data_Tblid = dt.Data_Tblid
+        LEFT JOIN db ON db.Dbid=dt.dbid
+        left join db_usage du on db.Db_Usageid= du.Db_UsageId
+        LEFT JOIN label lb on dfmi.Labelid = lb.Labelid
+        LEFT JOIN data_tbl_mark_idx dx on dx.Data_Tblid=dt.Data_Tblid
+        WHERE 1= 1
+        and db.Partid=#{param.partid}
+        and dt.Del_Dt is null
+        and du.db_usage_cd in('02','07','08')
+        <if test="param.labelId!=null and param.labelId!=''>0">
+            and lb.labelId =#{param.labelId}
+        </if>
+        <if test="param.tableMarks!=null and param.tableMarks.length>0">
+            and lb.Label_Catgid in
+            <foreach collection="param.tableMarks"  separator="," open="(" close=")" index="index" item="item">
+                #{item}
+            </foreach>
+        </if>
+        <if test="param.fieldMarks!=null and param.fieldMarks.length>0">
+            and dfmi.Labelid in
+            <foreach collection="param.fieldMarks"  separator="," open="(" close=")" index="index" item="item">
+                #{item}
+            </foreach>
+        </if>
+        <if test="param.dbId != null ">
+            and db.dbId=#{param.dbId}
+        </if>
+        <!-- order by df.fld_ord-->
+        order by db.Dbid asc,df.fld_ord asc
+        LIMIT #{param.start}, #{param.pageSize}
+    </select>
+
+</mapper>

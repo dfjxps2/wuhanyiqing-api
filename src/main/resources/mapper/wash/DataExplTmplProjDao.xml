@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.wash.dao.DataExplTmplProjDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.wash.entity.DataExplTmplProjEntity" id="dataExplTmplProjMap">
+        <result property="dataExplTmplid" column="Data_Expl_Tmplid"/>
+        <result property="chkProjid" column="Chk_Projid"/>
+        <result property="exctOrd" column="Exct_Ord"/>
+    </resultMap>
+
+    <delete  id="deleteByExp">
+        delete from data_expl_tmpl_proj
+        where Data_Expl_Tmplid in
+        <foreach collection="id" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+</mapper>

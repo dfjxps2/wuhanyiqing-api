@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.meta.dao.DataTblDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.meta.entity.DataTblEntity" id="dataTblMap">
+        <result property="dataTblid" column="Data_Tblid"/>
+        <result property="dbid" column="Dbid"/>
+        <result property="dataTblPhysNm" column="Data_Tbl_Phys_Nm"/>
+        <result property="dataTblCnNm" column="Data_Tbl_Cn_Nm"/>
+        <result property="dataTblDesc" column="Data_Tbl_Desc"/>
+        <result property="createDt" column="Create_Dt"/>
+        <result property="updDt" column="Upd_Dt"/>
+        <result property="delDt" column="Del_Dt"/>
+    </resultMap>
+
+
+    <select id="queryPageByRecord" parameterType="io.dfjinxin.modules.storage.dto.DataTblReq" resultType="java.util.HashMap">
+
+        SELECT
+        dt.Data_Tblid, dt.Dbid, dt.Data_Tbl_Phys_Nm, dt.Data_Tbl_Cn_Nm, db.Db_Cn_Nm
+        FROM
+        data_tbl dt
+        left join db db on dt.Dbid = db.Dbid
+        left join db_usage du on db.Db_UsageId = du.Db_UsageId
+        WHERE dt.Del_Dt is null
+            and db.Partid = #{record.partid}
+            and du.Db_Usage_Cd <![CDATA[<>]]> '01'
+            and du.Db_Usage_Cd <![CDATA[<>]]> '05'
+        <if test="record.dbid != null">
+            and db.Dbid = #{record.dbid}
+        </if>
+        <if test="record.tblName != null and record.tblName != '' ">
+            AND (dt.Data_Tbl_Cn_Nm LIKE concat('%',#{record.tblName},'%') or dt.Data_Tbl_Phys_Nm LIKE concat('%',#{record.tblName},'%'))
+        </if>
+        ORDER BY dt.Data_Tbl_Cn_Nm DESC
+    </select>
+
+    <select id="getTableCount" parameterType="map" resultType="java.lang.Long">
+        SELECT
+         count(Data_Tblid)
+        FROM
+        data_tbl t
+        INNER JOIN db t1 ON t.Dbid = t1.dbid
+        <where>
+            t.Del_Dt is NULL
+            <if test="partId != null ">
+                and t1.partid=#{partId}
+            </if>
+            <if test="dbId != null and  dbId != ''">
+                and t1.Dbid=#{dbId}
+            </if>
+            <if test="tableName != null and tableName.trim() != ''">
+                and ( t.data_tbl_cn_nm like concat('%',#{tableName},'%') OR
+                t.data_tbl_phys_nm like concat('%',#{tableName},'%')
+                )
+            </if>
+        </where>
+    </select>
+    <select id="getFiledCount" parameterType="map" resultType="java.lang.Long">
+        SELECT
+          count(*)
+        FROM
+          data_fld df
+        WHERE
+            df.Data_Tblid in (
+              <include refid="getTableIdNoLabel"/>
+            )
+    </select>
+    <select id="getRecordCount" parameterType="map" resultType="string">
+        SELECT
+          sum(dp.Rec_Qty)
+        FROM
+          dp
+        where
+            (dp.Data_Tblid,dp.Dp_Dt) in(
+                SELECT
+                dp.Data_Tblid,max(dp.Dp_Dt)
+                FROM
+                dp
+                GROUP BY dp.Data_Tblid
+            )
+            and dp.Data_Tblid in (
+              <include refid="getTableIdNoLabel"/>
+            )
+    </select>
+    <select id="getTableTagCount" parameterType="map" resultType="java.lang.Long">
+        SELECT
+          count(DISTINCT(dtmi.labelid))
+        FROM
+          data_tbl_mark_idx dtmi
+          Inner join label la ON dtmi.labelid=la.labelid
+        WHERE
+          la.tnmtId=#{tnmtId}
+          AND
+          dtmi.Data_Tblid in (
+            <include refid="getTableIdNoLabel"/>
+          )
+    </select>
+    <select id="getFiledTagCount" parameterType="map" resultType="java.lang.Long">
+        SELECT
+            count(DISTINCT(dfmi.labelid))
+        FROM
+            data_fld df
+            INNER JOIN data_fld_mark_idx dfmi ON df.fldId = dfmi.fldid
+            INNER JOIN label la ON dfmi.labelid=la.labelid
+        WHERE
+            la.tnmtId=#{tnmtId}
+            AND  df.Data_Tblid in (
+              <include refid="getTableIdNoLabel"/>
+            )
+    </select>
+
+    <select id="listByParams" resultType="hashMap" parameterType="map">
+        SELECT
+        t.Data_Tblid dataTblid,
+        t.Data_Tbl_Cn_Nm dataTblCnNm,
+        t.Data_Tbl_Phys_Nm dataTblPhysNm,
+        t1.Db_Cn_Nm dbNmCN
+        FROM
+        data_tbl t
+        INNER JOIN db t1 ON t.Dbid = t1.dbid
+        <where>
+            t.Del_Dt is NULL
+            <if test="partId != null ">
+                and t1.partid=#{partId}
+            </if>
+            <if test="dbId != null and  dbId != ''">
+                and t1.Dbid=#{dbId}
+            </if>
+            <if test="tableName != null and tableName.trim() != ''">
+                and ( t.data_tbl_cn_nm like concat('%',#{tableName},'%') OR
+                t.data_tbl_phys_nm like concat('%',#{tableName},'%')
+                )
+            </if>
+            <if test="dataTblId != null and dataTblId.trim() != ''">
+                and t.Data_Tblid = #{dataTblId}
+            </if>
+        </where>
+        <if test="startPage != null and pageSize != null ">
+            limit #{startPage},#{pageSize}
+        </if>
+    </select>
+    <select id="listByParamsCount" resultType="int" parameterType="map">
+        SELECT
+        count(Data_Tblid)
+        FROM
+        data_tbl t
+        INNER JOIN db t1 ON t.Dbid = t1.dbid
+        <where>
+            t.Del_Dt is NULL
+            <if test="partId != null ">
+                and t1.partid=#{partId}
+            </if>
+            <if test="dbId != null and  dbId != ''">
+                and t1.Dbid=#{dbId}
+            </if>
+            <if test="tableName != null and tableName.trim() != ''">
+                and ( t.data_tbl_cn_nm like concat('%',#{tableName},'%') OR
+                t.data_tbl_phys_nm like concat('%',#{tableName},'%')
+                )
+            </if>
+            <if test="dataTblId != null and dataTblId.trim() != ''">
+                and t.Data_Tblid = #{dataTblId}
+            </if>
+        </where>
+    </select>
+    <!--元数据视图 tab1 查询语句-->
+    <sql id="getTableIdNoLabel">
+        SELECT
+            Data_Tblid
+        FROM
+            data_tbl t
+            INNER JOIN db t1 ON t.Dbid = t1.dbid
+            INNER JOIN db_usage du ON t1.db_usageid=du.db_usageid
+        <where>
+            t.Del_Dt is NULL
+            AND
+            du.db_usage_cd in('02','07','08')
+            <if test="partId != null ">
+                and t1.partid=#{partId}
+            </if>
+            <if test="dbId != null and  dbId != ''">
+                and t1.Dbid=#{dbId}
+            </if>
+            <if test="tableName != null and tableName.trim() != ''">
+                and ( t.data_tbl_cn_nm like concat('%',#{tableName},'%') OR
+                t.data_tbl_phys_nm like concat('%',#{tableName},'%')
+                )
+            </if>
+        </where>
+    </sql>
+    <select id="getTableTagList" resultType="HashMap" >
+        SELECT
+          l.Labelid labelId,l.label_nm labelNm,count(*) count
+        FROM
+          label l
+          INNER JOIN data_tbl_mark_idx dtmi ON l.Labelid = dtmi.labelid
+          where
+            l.tnmtid=#{tnmtId}
+            AND
+            dtmi.Data_Tblid in (
+                 <include refid="getTableIdNoLabel"></include>
+            )
+        group by l.Labelid
+    </select>
+    <select id="getFiledTagList" resultType="HashMap" >
+        SELECT
+          label.Labelid labelId,label.label_nm labelNm,count(*) count
+        FROM
+            data_fld df
+            Inner JOIN data_fld_mark_idx dfmi on df.fldid=dfmi.fldid
+            Inner JOIN label on dfmi.Labelid=label.Labelid
+        where
+            label.tnmtid=#{tnmtId}
+            AND
+            df.Data_Tblid in (
+              <include refid="getTableIdNoLabel"></include>
+            )
+        group by label.Labelid
+    </select>
+    <select id="getTableRecordList" resultType="HashMap" >
+        SELECT
+            label.Labelid labelId,
+            label.label_nm labelNm,
+            sum(dp.Rec_Qty) count
+        FROM
+          label
+          INNER JOIN data_tbl_mark_idx dtmi ON label.Labelid = dtmi.labelid
+          INNER JOIN dp ON dp.Data_Tblid = dtmi.Data_Tblid
+        where
+            label.tnmtid=#{tnmtId}
+            AND
+            (dp.Data_Tblid,dp.Dp_Dt) in(
+            SELECT
+            dp.Data_Tblid,max(dp.Dp_Dt)
+            FROM
+            dp
+            GROUP BY dp.Data_Tblid
+            )
+            AND
+            dtmi.Data_Tblid in (
+              <include refid="getTableIdNoLabel"></include>
+            )
+        GROUP BY
+        label.Labelid
+    </select>
+    <!--点击表格通过tableId和lableId 获取详细数据 -->
+    <select id="getTableTagListDetail" parameterType="map" resultType="HashMap" >
+        SELECT
+        dt.Data_Tbl_Cn_Nm tableNmCn,
+        dt.Data_Tbl_Phys_Nm tableNmEn,
+        l.Labelid labelId,
+        l.label_nm labelNm
+        FROM
+        label l
+        INNER JOIN data_tbl_mark_idx dtmi ON l.Labelid = dtmi.labelid
+        INNER JOIN data_tbl dt ON dtmi.Data_Tblid=dt.Data_Tblid
+        INNER join db ON dt.Dbid=db.Dbid
+        INNER JOIN db_usage du ON db.db_usageid=du.db_usageid
+        <where>
+            dt.Del_Dt is NULL
+            AND
+            du.db_usage_cd in('02','07','08')
+            <if test="params.partId != null ">
+                and db.partid=#{params.partId}
+            </if>
+            <if test="params.dbId != null and  params.dbId != ''">
+                and db.Dbid=#{params.dbId}
+            </if>
+            <if test="params.tableName != null and params.tableName.trim() != ''">
+                and ( dt.data_tbl_cn_nm like concat('%',#{params.tableName},'%') OR
+                dt.data_tbl_phys_nm like concat('%',#{params.tableName},'%')
+                )
+            </if>
+            <if test="params.labelId !=null ">
+                and l.labelid =#{params.labelId}
+            </if>
+        </where>
+    </select>
+    <select id="getFiledTagListDetail" parameterType="map" resultType="HashMap" >
+        SELECT
+        dt.Data_Tbl_Cn_Nm tableNmCn,
+        dt.Data_Tbl_Phys_Nm tableNmEn,
+        l.Labelid labelId,
+        l.label_nm labelNm,
+        df.Fld_Cn_Nm fldNmCn,
+        df.Fld_Phys_Nm fldNmEn
+        FROM
+        data_fld df
+        INNER JOIN data_fld_mark_idx dfmi ON df.fldid = dfmi.fldid
+        INNER JOIN label l ON dfmi.Labelid = l.Labelid
+        INNER JOIN data_tbl dt ON dt.Data_Tblid = df.Data_Tblid
+        INNER join db ON dt.Dbid=db.Dbid
+        INNER JOIN db_usage du ON db.db_usageid=du.db_usageid
+        <where>
+            dt.Del_Dt is NULL
+            AND
+            du.db_usage_cd in('02','07','08')
+            <if test="params.partId != null ">
+                and db.partid=#{params.partId}
+            </if>
+            <if test="params.dbId != null and  params.dbId != ''">
+                and db.Dbid=#{params.dbId}
+            </if>
+            <if test="params.tableName != null and params.tableName.trim() != ''">
+                and ( dt.data_tbl_cn_nm like concat('%',#{params.tableName},'%') OR
+                dt.data_tbl_phys_nm like concat('%',#{params.tableName},'%')
+                )
+            </if>
+            <if test="params.labelId !=null ">
+                and l.labelid =#{params.labelId}
+            </if>
+        </where>
+    </select>
+    <select id="getTableRecordListDetail" parameterType="map" resultType="HashMap" >
+        SELECT
+        dt.Data_Tbl_Cn_Nm tableNmCn,
+        dt.Data_Tbl_Phys_Nm tableNmEn,
+        l.Labelid labelId,
+        l.label_nm labelNm,
+        dp.Rec_Qty count
+        FROM
+        label l
+        INNER JOIN data_tbl_mark_idx dtmi ON l.Labelid = dtmi.labelid
+        INNER JOIN dp ON dp.Data_Tblid = dtmi.Data_Tblid
+        INNER JOIN data_tbl dt on dt.Data_Tblid=dtmi.Data_Tblid
+        INNER join db ON dt.Dbid=db.Dbid
+        INNER JOIN db_usage du ON db.db_usageid=du.db_usageid
+        <where>
+            dt.Del_Dt is NULL
+            AND
+            du.db_usage_cd in('02','07','08')
+            AND
+            (dp.Data_Tblid,dp.Dp_Dt) in(
+            SELECT
+            dp.Data_Tblid,max(dp.Dp_Dt)
+            FROM
+            dp
+            GROUP BY dp.Data_Tblid
+            )
+            <if test="params.partId != null ">
+                and db.partid=#{params.partId}
+            </if>
+            <if test="params.dbId != null and  params.dbId != ''">
+                and db.Dbid=#{params.dbId}
+            </if>
+            <if test="params.tableName != null and params.tableName.trim() != ''">
+                and ( dt.data_tbl_cn_nm like concat('%',#{params.tableName},'%') OR
+                dt.data_tbl_phys_nm like concat('%',#{params.tableName},'%')
+                )
+            </if>
+            <if test="params.labelId !=null ">
+                and l.labelid =#{params.labelId}
+            </if>
+        </where>
+    </select>
+    <!--元数据视图 tab1 查询语句end -->
+
+    <!--标签视图 tab2 查询语句 start-->
+    <!--关联上标签表进行查询-->
+    <sql id="getTableIdJoinLabel">
+        SELECT
+            dt.Data_Tblid
+        FROM
+            data_tbl_mark_idx dtmi
+            INNER JOIN data_tbl dt ON dtmi.Data_Tblid = dt.Data_Tblid
+            INNER JOIN db dbt ON dt.Dbid = dbt.Dbid
+            INNER JOIN label la ON dtmi.labelid = la.labelid
+            INNER JOIN db_usage du ON dbt.db_usageid=du.db_usageid
+        where
+            dt.Del_Dt is NULL
+            AND
+            du.db_usage_cd in('02','07','08')
+            and la.tnmtid=#{tnmtId}
+        <if test="partId != null ">
+            and dbt.partid=#{partId}
+        </if>
+        <if test="dbId != null and  dbId != ''">
+            and dbt.Dbid=#{dbId}
+        </if>
+        <if test="labelIdList !=null and  labelIdList.size()>0">
+            and la.labelid in
+            <foreach collection="labelIdList"  separator="," open="(" close=")" index="index" item="item">
+                #{item}
+            </foreach>
+        </if>
+    </sql>
+    <select id="getTableTagListJoinLabel" resultType="HashMap" >
+        SELECT
+        l.Labelid labelId,l.label_nm labelNm,count(*) count
+        FROM
+        label l
+        INNER JOIN data_tbl_mark_idx dtmi ON l.Labelid = dtmi.labelid
+        where
+        l.tnmtId=#{tnmtId}
+        AND
+        dtmi.Data_Tblid in (
+        <include refid="getTableIdJoinLabel"></include>
+        )
+        <if test="labelIdList !=null and  labelIdList.size()>0">
+            and l.labelid in
+            <foreach collection="labelIdList"  separator="," open="(" close=")" index="index" item="item">
+                #{item}
+            </foreach>
+        </if>
+        group by l.Labelid
+    </select>
+    <select id="getFiledTagListJoinLabel" resultType="HashMap" >
+        SELECT
+        l.Labelid labelId,l.label_nm labelNm,count(*) count
+        FROM
+        data_fld df
+        Inner JOIN data_fld_mark_idx dfmi on df.fldid=dfmi.fldid
+        Inner JOIN label l on dfmi.Labelid=l.Labelid
+        where
+        l.tnmtId=#{tnmtId}
+        AND
+        df.Data_Tblid in (
+        <include refid="getTableIdJoinLabel"></include>
+        )
+        <if test="labelIdList !=null and  labelIdList.size()>0">
+            and l.labelid in
+            <foreach collection="labelIdList"  separator="," open="(" close=")" index="index" item="item">
+                #{item}
+            </foreach>
+        </if>
+        group by l.Labelid
+    </select>
+    <select id="getTableRecordListJoinLabel" resultType="HashMap" >
+        SELECT
+        l.Labelid labelId,
+        l.label_nm labelNm,
+        sum(dp.Rec_Qty) count
+        FROM
+        label l
+        INNER JOIN data_tbl_mark_idx dtmi ON l.Labelid = dtmi.labelid
+        INNER JOIN dp ON dp.Data_Tblid = dtmi.Data_Tblid
+        where
+        l.tnmtId=#{tnmtId}
+        AND
+        (dp.Data_Tblid,dp.Dp_Dt) in(
+        SELECT
+        dp.Data_Tblid,max(dp.Dp_Dt)
+        FROM
+        dp
+        GROUP BY dp.Data_Tblid
+        )
+        AND
+        dtmi.Data_Tblid in (
+        <include refid="getTableIdJoinLabel"></include>
+        )
+        <if test="labelIdList !=null and  labelIdList.size()>0">
+            and l.labelid in
+            <foreach collection="labelIdList"  separator="," open="(" close=")" index="index" item="item">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY
+        l.Labelid
+    </select>
+    <!--点击表格通过tableId和lableId 获取详细数据 -->
+    <sql id="getTableIdAsFilter">
+        SELECT
+        dt.Data_Tblid
+        FROM
+        data_tbl_mark_idx dtmi
+        INNER JOIN data_tbl dt ON dtmi.Data_Tblid = dt.Data_Tblid
+        INNER JOIN db dbt ON dt.Dbid = dbt.Dbid
+        INNER JOIN label la ON dtmi.labelid = la.labelid
+        INNER JOIN db_usage du ON dbt.db_usageid=du.db_usageid
+        where
+        dt.Del_Dt is NULL
+        AND
+        du.db_usage_cd in('02','07','08')
+        and la.tnmtid=#{params.tnmtId}
+        <if test="params.partId != null ">
+            and dbt.partid=#{params.partId}
+        </if>
+        <if test="params.dbId != null and  params.dbId != ''">
+            and dbt.Dbid=#{params.dbId}
+        </if>
+        <if test="params.labelIdList !=null and  params.labelIdList.size()>0">
+            and la.labelid in
+            <foreach collection="params.labelIdList"  separator="," open="(" close=")" index="index" item="item">
+                #{item}
+            </foreach>
+        </if>
+    </sql>
+    <select id="getTableTagListJoinLabelDetail" parameterType="map" resultType="HashMap" >
+        SELECT
+        dt.Data_Tbl_Cn_Nm tableNmCn,
+        dt.Data_Tbl_Phys_Nm tableNmEn,
+        l.Labelid labelId,
+        l.label_nm labelNm
+        FROM
+        label l
+        INNER JOIN data_tbl_mark_idx dtmi ON l.Labelid = dtmi.labelid
+        INNER JOIN data_tbl dt ON dtmi.Data_Tblid=dt.Data_Tblid
+        INNER join db ON dt.Dbid=db.Dbid
+        INNER JOIN db_usage du ON db.db_usageid=du.db_usageid
+        <where>
+            dt.Del_Dt is NULL
+            AND
+            dt.Data_Tblid in (
+              <include refid="getTableIdAsFilter"></include>
+            )
+            AND
+            du.db_usage_cd in('02','07','08')
+            <if test="params.partId != null ">
+                and db.partid=#{params.partId}
+            </if>
+            <if test="params.dbId != null and  params.dbId != ''">
+                and db.Dbid=#{params.dbId}
+            </if>
+            <if test="params.labelId !=null ">
+                and l.labelid =#{params.labelId}
+            </if>
+        </where>
+    </select>
+    <select id="getFiledTagListJoinLabelDetail" parameterType="map" resultType="HashMap" >
+        SELECT
+        dt.Data_Tbl_Cn_Nm tableNmCn,
+        dt.Data_Tbl_Phys_Nm tableNmEn,
+        l.Labelid labelId,
+        l.label_nm labelNm,
+        df.Fld_Cn_Nm fldNmCn,
+        df.Fld_Phys_Nm fldNmEn
+        FROM
+        data_fld df
+        INNER JOIN data_fld_mark_idx dfmi ON df.fldid = dfmi.fldid
+        INNER JOIN label l ON dfmi.Labelid = l.Labelid
+        INNER JOIN data_tbl dt ON dt.Data_Tblid = df.Data_Tblid
+        INNER join db ON dt.Dbid=db.Dbid
+        INNER JOIN db_usage du ON db.db_usageid=du.db_usageid
+        <where>
+            dt.Del_Dt is NULL
+            AND
+            dt.Data_Tblid in (
+            <include refid="getTableIdAsFilter"></include>
+            )
+            AND
+            du.db_usage_cd in('02','07','08')
+            <if test="params.partId != null ">
+                and db.partid=#{params.partId}
+            </if>
+            <if test="params.dbId != null and  params.dbId != ''">
+                and db.Dbid=#{params.dbId}
+            </if>
+            <if test="params.labelId !=null ">
+                and l.labelid =#{params.labelId}
+            </if>
+        </where>
+    </select>
+    <select id="getTableRecordListJoinLabelDetail" parameterType="map" resultType="HashMap" >
+        SELECT
+        dt.Data_Tbl_Cn_Nm tableNmCn,
+        dt.Data_Tbl_Phys_Nm tableNmEn,
+        l.Labelid labelId,
+        l.label_nm labelNm,
+        dp.Rec_Qty count
+        FROM
+        label l
+        INNER JOIN data_tbl_mark_idx dtmi ON l.Labelid = dtmi.labelid
+        INNER JOIN dp ON dp.Data_Tblid = dtmi.Data_Tblid
+        INNER JOIN data_tbl dt on dt.Data_Tblid=dtmi.Data_Tblid
+        INNER join db ON dt.Dbid=db.Dbid
+        INNER JOIN db_usage du ON db.db_usageid=du.db_usageid
+        <where>
+            dt.Del_Dt is NULL
+            AND
+            (dp.Data_Tblid,dp.Dp_Dt) in(
+            SELECT
+            dp.Data_Tblid,max(dp.Dp_Dt)
+            FROM
+            dp
+            GROUP BY dp.Data_Tblid
+            )
+            AND
+            dt.Data_Tblid in (
+            <include refid="getTableIdAsFilter"></include>
+            )
+            AND
+            du.db_usage_cd in('02','07','08')
+            <if test="params.partId != null ">
+                and db.partid=#{params.partId}
+            </if>
+            <if test="params.dbId != null and  params.dbId != ''">
+                and db.Dbid=#{params.dbId}
+            </if>
+            <if test="params.labelId !=null ">
+                and l.labelid =#{params.labelId}
+            </if>
+        </where>
+    </select>
+    <!--标签视图 tab2 查询语句 end-->
+
+</mapper>

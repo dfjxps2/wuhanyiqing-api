@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.meta.dao.DbDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.meta.entity.DbEntity" id="dbMap">
+        <result property="dbid" column="Dbid"/>
+        <result property="dbPhysNm" column="Db_Phys_Nm"/>
+        <result property="dbCnNm" column="Db_Cn_Nm"/>
+        <result property="partid" column="Partid"/>
+        <result property="dbUsageid" column="Db_Usageid"/>
+    </resultMap>
+
+<!--    <select id="queryDbListByTnmt" parameterType="java.lang.Long" resultType="io.dfjinxin.modules.meta.entity.DbEntity">-->
+<!--        select-->
+<!--            db.Dbid,-->
+<!--            db.Db_Cn_Nm,-->
+<!--            db.Db_Phys_Nm,-->
+<!--            db.Partid-->
+<!--            from db db-->
+<!--        left join data_part dp on db.Partid = dp.Partid-->
+<!--        WHERE 1 = 1-->
+<!--        <if test="tnmtid != null ">-->
+<!--            AND dp.Tnmtid = #{tnmtid}-->
+<!--        </if>-->
+<!--    </select>-->
+
+    <select id="queryDbsRestrict" parameterType="java.util.Map" resultMap="dbMap">
+        SELECT
+            db.Dbid,
+            db.Db_Cn_Nm,
+            db.Db_Phys_Nm,
+            db.Partid,
+            db.Db_Usageid
+        FROM
+            db db
+        LEFT JOIN db_usage t ON db.Db_Usageid = t.Db_UsageId
+        WHERE
+            db.Partid = #{Partid}
+    </select>
+
+    <select id="queryDBListByPartid" parameterType="java.lang.Integer" resultMap="dbMap">
+        SELECT
+            db.Dbid,
+            db.Db_Cn_Nm,
+            db.Db_Phys_Nm,
+            db.Partid,
+            db.Db_Usageid
+        FROM
+            db db
+        LEFT JOIN db_usage du ON db.Db_Usageid = du.Db_UsageId
+        WHERE
+            db.Partid = #{partid}
+            and (du.Db_Usage_Cd = '02' or du.Db_Usage_Cd = '07' or du.Db_Usage_Cd = '08')
+    </select>
+
+    <select id="queryDBByCd" resultType="java.util.Map">
+        SELECT
+            db.Dbid as dbid,
+            db.Db_Cn_Nm as dbCnNm,
+            db.Db_Phys_Nm as dbPhysNm,
+            db.Partid as partid,
+            db.Db_Usageid as dbUsageid,
+            du.Db_Usage_Cd as dbUsageCd
+        FROM
+            db db
+        LEFT JOIN db_usage du ON db.Db_Usageid = du.Db_UsageId
+        LEFT JOIN data_part dp ON dp.partid = db.partid
+        WHERE
+            dp.tnmtid = #{tnmtid}
+            <choose>
+                <when test="dataType !=null and dataType != ''">
+                    and du.Db_Usage_Cd = #{dataType}
+                </when>
+                <otherwise>
+                    and db.Dbid = #{dbid}
+                </otherwise>
+            </choose>
+    </select>
+
+    <select id="queryDBUBytblid" resultType="io.dfjinxin.modules.storage.dto.DateQueryItemDto">
+        SELECT
+        db.Dbid as dbid,
+        db.Db_Cn_Nm as dbCnNm,
+        db.Db_Phys_Nm as dbPhysNm,
+        db.Partid as partid,
+        dp.Part_Typeid as partTypeid,
+        dt.Data_Tblid as dataTblid,
+        if(dt.data_tbl_cn_nm <![CDATA[<>]]> '' and dt.data_tbl_cn_nm is not null, dt.data_tbl_cn_nm, dt.Data_Tbl_Phys_Nm) as dataTblCnNm
+        FROM
+        db db
+        LEFT JOIN data_tbl dt ON dt.Dbid = db.Dbid
+        LEFT JOIN data_part dp on dp.Partid = db.Partid
+        WHERE
+            dt.Data_Tblid = #{tblid}
+    </select>
+
+</mapper>

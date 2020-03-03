@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.tag.dao.TagTypeDao">
+
+    <resultMap type="io.dfjinxin.modules.tag.entity.TagTypeEntity" id="labelCatgMap">
+        <result property="labelCatgid" column="Label_Catgid"/>
+        <result property="suprLabelCatgid" column="Supr_Label_Catgid"/>
+        <result property="labelCatgCd" column="Label_Catg_Cd"/>
+        <result property="labelCatgNm" column="Label_Catg_Nm"/>
+        <result property="labelCatgDesc" column="Label_Catg_Desc"/>
+        <result property="ifReadOnly" column="If_Read_Only"/>
+        <result property="tnmtid" column="Tnmtid"/>
+        <result property="usedTimes" column="usedTimes"/>
+    </resultMap>
+
+    <select id="queryTagTypeList" resultMap="labelCatgMap">
+        select lc.Label_Catgid,
+           lc.Supr_Label_Catgid,
+           lc.Label_Catg_Cd,
+           lc.Label_Catg_Nm,
+           lc.Label_Catg_Desc,
+           lc.If_Read_Only,
+           count(dtmi.Data_Tblid) as usedTimes
+        from label_catg lc
+        left join label lab on lab.Label_Catgid = lc.Label_Catgid
+        left join data_tbl_mark_idx dtmi on lab.Labelid = dtmi.Labelid
+        where lc.Tnmtid=#{tenantId}
+        group by lc.Label_Catgid
+    </select>
+
+    <insert id="saveAndGetId" parameterType="io.dfjinxin.modules.tag.entity.TagTypeEntity">
+        <selectKey keyProperty="labelCatgid" resultType="java.lang.Integer" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into label_catg(Supr_Label_Catgid,Label_Catg_Cd,Label_Catg_Nm,Label_Catg_Desc,If_Read_Only,Tnmtid)
+        values(#{suprLabelCatgid},#{labelCatgCd},#{labelCatgNm},#{labelCatgDesc},#{ifReadOnly},#{tnmtid})
+    </insert>
+
+</mapper>
