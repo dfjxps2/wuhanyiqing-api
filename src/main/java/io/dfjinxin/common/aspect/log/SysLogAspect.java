@@ -32,7 +32,14 @@ public class SysLogAspect {
 
 	}
 
-	@Around("logPointCut()")
+	/**
+	 * 这个切入功能应该去除，否则文件下载有问题！！！！！！！！！！！！！！！！
+	 * zhujiahou
+	 * @param joinPoint
+	 * @return
+	 * @throws Throwable
+	 */
+	//@Around("logPointCut()")
 	public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         String className = joinPoint.getTarget().getClass().getName();//请求的类

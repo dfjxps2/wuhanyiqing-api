@@ -28,7 +28,7 @@ public class DetainedPersonInfoEntity  implements Serializable {
 	private String areaCd;//行政区划代码
 	private String bz;//备注
 	private String cardNumber;//身份证号
-	
+	private String detainedName;//姓名
 	private String destCity;//目的城市
 	private String detainedInfo;//滞留详情
 	private String detainedPersonStatusCd;//滞留人员状态代码
@@ -164,6 +164,12 @@ public class DetainedPersonInfoEntity  implements Serializable {
 	}
 	public void setTelephone(String telephone) {
 		this.telephone = telephone;
+	}
+	public String getDetainedName() {
+		return detainedName;
+	}
+	public void setDetainedName(String detainedName) {
+		this.detainedName = detainedName;
 	}
 	
 }
