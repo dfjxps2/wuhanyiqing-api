@@ -62,9 +62,9 @@ public class DataIntoController extends AbstractController {
      * 信息
      */
     @GetMapping("/info/{id}")
-    @ApiOperation(value = "链接到详细页面",notes = "参数为主键id")
+    @ApiOperation(value = "链接到详细页面", notes = "参数为主键id")
 //    @RequiresPermissions("analyse:t01detainedpersoninfo:info")
-    public R info(@PathVariable("id") String id){
+    public R info(@PathVariable("id") String id) {
         T01DetainedPersonInfoEntity t01DetainedPersonInfo = t01DetainedPersonInfoService.getById(id);
 
         return R.ok().put("t01DetainedPersonInfo", t01DetainedPersonInfo);
@@ -76,19 +76,41 @@ public class DataIntoController extends AbstractController {
     @PostMapping("/save")
     @ApiOperation("新增")
 //    @RequiresPermissions("analyse:t01detainedpersoninfo:save")
-    public R save(@RequestBody T01DetainedPersonInfoEntity t01DetainedPersonInfo){
+    public R save(@RequestBody T01DetainedPersonInfoEntity t01DetainedPersonInfo) {
         t01DetainedPersonInfoService.save(t01DetainedPersonInfo);
 
         return R.ok();
     }
 
     /**
-     * 修改
+     * 修改状态
+     * 1-新增
+     * 2-提交
+     * 3-退回
      */
-    @PostMapping("/update")
-    @ApiOperation("修改")
+    @PostMapping("/updateStatus/{id}")
+    @ApiOperation("更新状态-提交&退回功能")
 //    @RequiresPermissions("analyse:t01detainedpersoninfo:update")
-    public R update(@RequestBody T01DetainedPersonInfoEntity t01DetainedPersonInfo){
+    public R update(@PathVariable("id") Long id, @RequestParam("keepStatusCd") Integer keepStatusCd) {
+        if (id == null || keepStatusCd == null) {
+            return R.error("参数为空!");
+        }
+        T01DetainedPersonInfoEntity entity = new T01DetainedPersonInfoEntity();
+        entity.setId(id);
+        entity.setKeepStatusCd(keepStatusCd.toString());
+        t01DetainedPersonInfoService.updateById(entity);
+
+        return R.ok();
+    }
+
+
+    /**
+     * 修改上报对象信息
+     */
+    @PostMapping("/updateInfo")
+    @ApiOperation("修改上报对象信息")
+//    @RequiresPermissions("analyse:t01detainedpersoninfo:update")
+    public R updateInfo(@RequestBody T01DetainedPersonInfoEntity t01DetainedPersonInfo) {
         t01DetainedPersonInfoService.updateById(t01DetainedPersonInfo);
 
         return R.ok();

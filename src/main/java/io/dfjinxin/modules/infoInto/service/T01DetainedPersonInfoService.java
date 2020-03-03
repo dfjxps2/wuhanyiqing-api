@@ -16,5 +16,6 @@ import java.util.Map;
 public interface T01DetainedPersonInfoService extends IService<T01DetainedPersonInfoEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
 }
 

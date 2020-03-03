@@ -1,11 +1,8 @@
 package io.dfjinxin.modules.infoInto.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.dfjinxin.common.utils.PageUtils;
-import io.dfjinxin.common.utils.Query;
 import io.dfjinxin.modules.infoInto.dao.T01DetainedPersonInfoDao;
 import io.dfjinxin.modules.infoInto.entity.T01DetainedPersonInfoEntity;
 import io.dfjinxin.modules.infoInto.service.T01DetainedPersonInfoService;
@@ -30,5 +27,4 @@ public class T01DetainedPersonInfoServiceImpl extends ServiceImpl<T01DetainedPer
         page = (Page) super.baseMapper.queryPage(page, params);
         return new PageUtils(page);
     }
-
 }
