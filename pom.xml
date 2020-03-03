@@ -44,7 +44,7 @@
 		<!--打包时跳过测试-->
 		<!--<skipTests>true</skipTests>-->
 		<!--打包名称-->
-		<projectname>fagaiwei_api</projectname>
+		<projectname>wuhanyiqing-api</projectname>
 
 	</properties>
 

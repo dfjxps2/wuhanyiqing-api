@@ -7,7 +7,7 @@
         <packaging>war</packaging>
       </options>
     </properties>
-    <root id="archive" name="fagaiwei_api.war">
+    <root id="archive" name="wuhanyiqing-api.war">
       <element id="artifact" artifact-name="wuhanyiqing-api:war exploded" />
     </root>
   </artifact>

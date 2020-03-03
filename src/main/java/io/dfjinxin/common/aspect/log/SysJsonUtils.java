@@ -1,10 +1,6 @@
 package io.dfjinxin.common.aspect.log;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import io.dfjinxin.modules.storage.dto.WashCmpuParasDto;
-import java.lang.reflect.Type;
-import java.util.List;
 
 public class SysJsonUtils {
     private static Gson gson = new Gson();
@@ -27,14 +23,14 @@ public class SysJsonUtils {
         return "";
     }
 
-    public static List<WashCmpuParasDto> jsonToWashCmpuParas(String jsonArray){
-        try{
-            Type type = new TypeToken<List<WashCmpuParasDto>>() {}.getType();
-            return gson.fromJson(jsonArray, type);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
-    }
+//    public static List<WashCmpuParasDto> jsonToWashCmpuParas(String jsonArray){
+//        try{
+//            Type type = new TypeToken<List<WashCmpuParasDto>>() {}.getType();
+//            return gson.fromJson(jsonArray, type);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
 }

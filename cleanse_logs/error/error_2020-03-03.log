@@ -1,1 +1,0 @@
-2020-03-03 11:06:38.235 [main] ERROR com.alibaba.druid.pool.DruidAbstractDataSource [DruidAbstractDataSource.java:754] - minEvictableIdleTimeMillis should be greater than 30000
