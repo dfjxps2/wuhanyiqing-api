@@ -32,11 +32,11 @@ public class ShiroServiceImpl implements ShiroService {
     private SysUserTokenDao sysUserTokenDao;
 
     @Override
-    public Set<String> getUserPermissions(String userId) {
+    public Set<String> getUserPermissions(long userId) {
         List<String> permsList;
 
         //系统管理员，拥有最高权限
-        if(new Integer(userId).equals(Constant.SUPER_ADMIN)){
+        if(userId == Constant.SUPER_ADMIN){
             List<SysMenuEntity> menuList = sysMenuDao.selectList(null);
             permsList = new ArrayList<>(menuList.size());
             for(SysMenuEntity menu : menuList){
@@ -64,15 +64,5 @@ public class ShiroServiceImpl implements ShiroService {
     @Override
     public SysUserEntity queryUser(Long userId) {
         return sysUserDao.selectById(userId);
-    }
-
-    @Override
-    public SysUserEntity queryUserByName(String userName) {
-        return sysUserDao.queryByUserName(userName);
-    }
-
-    @Override
-    public void removeUserDBCache(String userName) {
-        sysUserDao.deleteByUserName(userName);
     }
 }

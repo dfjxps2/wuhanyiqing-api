@@ -35,17 +35,7 @@ public class SysUserEntity implements Serializable {
 	 * 用户ID
 	 */
 	@TableId
-	private String userId;
-
-	private String govUserId;
-
-	/**
-	 * 用户名
-	 */
-	private Long tenantId;
-
-	@TableField(exist=false)
-	private String tenantName;//租户名称不能为空
+	private Long userId;
 
 	/**
 	 * 用户名
@@ -76,6 +66,15 @@ public class SysUserEntity implements Serializable {
 	 */
 	private String mobile;
 
+	/**
+	 * 组织机构Id
+	 */
+	private String orgId;
+
+	/**
+	 * 组织机构名称
+	 */
+	private String orgName;
 	/**
 	 * 状态  0：禁用   1：正常
 	 */

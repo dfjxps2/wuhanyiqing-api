@@ -33,7 +33,7 @@ public class ShiroUtils {
 		return (SysUserEntity)SecurityUtils.getSubject().getPrincipal();
 	}
 
-	public static String getUserId() {
+	public static Long getUserId() {
 		return getUserEntity().getUserId();
 	}
 	

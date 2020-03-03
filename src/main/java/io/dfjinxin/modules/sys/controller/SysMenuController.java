@@ -12,13 +12,11 @@ import io.dfjinxin.common.annotation.SysLog;
 import io.dfjinxin.common.exception.RRException;
 import io.dfjinxin.common.utils.Constant;
 import io.dfjinxin.common.utils.R;
-import io.dfjinxin.modules.sys.entity.GovRootMenuEntity;
 import io.dfjinxin.modules.sys.entity.SysMenuEntity;
 import io.dfjinxin.modules.sys.service.ShiroService;
 import io.dfjinxin.modules.sys.service.SysMenuService;
-import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang.StringUtils;
-import io.dfjinxin.common.annotation.RequiresPermissions;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +30,7 @@ import java.util.Set;
  */
 @RestController
 @RequestMapping("/sys/menu")
-public class SysMenuController {
+public class SysMenuController extends AbstractController {
 	@Autowired
 	private SysMenuService sysMenuService;
 	@Autowired
@@ -43,24 +41,17 @@ public class SysMenuController {
 	 */
 	@GetMapping("/nav")
 	public R nav(){
-		List<SysMenuEntity> menuList = sysMenuService.getUserMenuList(1L);
-		Set<String> permissions = shiroService.getUserPermissions("1");
+		List<SysMenuEntity> menuList = sysMenuService.getUserMenuList(getUserId());
+		Set<String> permissions = shiroService.getUserPermissions(getUserId());
 		return R.ok().put("menuList", menuList).put("permissions", permissions);
 	}
-
-	@GetMapping("/authMenus")
-	@ApiOperation("从太极获取菜单列表")
-	public R authMenus(){
-		List<GovRootMenuEntity> menuList = sysMenuService.getMenuFromGovAuth((long)1111);
-		return R.ok().put("menuList", menuList);
-	}
-
+	
 	/**
 	 * 所有菜单列表
 	 */
 	@GetMapping("/list")
 	@RequiresPermissions("sys:menu:list")
-	public R list(){
+	public List<SysMenuEntity> list(){
 		List<SysMenuEntity> menuList = sysMenuService.list();
 		for(SysMenuEntity sysMenuEntity : menuList){
 			SysMenuEntity parentMenuEntity = sysMenuService.getById(sysMenuEntity.getParentId());
@@ -68,9 +59,10 @@ public class SysMenuController {
 				sysMenuEntity.setParentName(parentMenuEntity.getName());
 			}
 		}
-		return R.ok().put("data", menuList);
-	}
 
+		return menuList;
+	}
+	
 	/**
 	 * 选择菜单(添加、修改菜单)
 	 */
@@ -79,7 +71,7 @@ public class SysMenuController {
 	public R select(){
 		//查询列表数据
 		List<SysMenuEntity> menuList = sysMenuService.queryNotButtonList();
-
+		
 		//添加顶级菜单
 		SysMenuEntity root = new SysMenuEntity();
 		root.setMenuId(0L);
@@ -87,10 +79,10 @@ public class SysMenuController {
 		root.setParentId(-1L);
 		root.setOpen(true);
 		menuList.add(root);
-
+		
 		return R.ok().put("menuList", menuList);
 	}
-
+	
 	/**
 	 * 菜单信息
 	 */
@@ -100,7 +92,7 @@ public class SysMenuController {
 		SysMenuEntity menu = sysMenuService.getById(menuId);
 		return R.ok().put("menu", menu);
 	}
-
+	
 	/**
 	 * 保存
 	 */
@@ -110,12 +102,12 @@ public class SysMenuController {
 	public R save(@RequestBody SysMenuEntity menu){
 		//数据校验
 		verifyForm(menu);
-
+		
 		sysMenuService.save(menu);
-
+		
 		return R.ok();
 	}
-
+	
 	/**
 	 * 修改
 	 */
@@ -125,12 +117,12 @@ public class SysMenuController {
 	public R update(@RequestBody SysMenuEntity menu){
 		//数据校验
 		verifyForm(menu);
-
+				
 		sysMenuService.updateById(menu);
-
+		
 		return R.ok();
 	}
-
+	
 	/**
 	 * 删除
 	 */
@@ -152,7 +144,7 @@ public class SysMenuController {
 
 		return R.ok();
 	}
-
+	
 	/**
 	 * 验证参数是否正确
 	 */
@@ -160,25 +152,25 @@ public class SysMenuController {
 		if(StringUtils.isBlank(menu.getName())){
 			throw new RRException("菜单名称不能为空");
 		}
-
+		
 		if(menu.getParentId() == null){
 			throw new RRException("上级菜单不能为空");
 		}
-
+		
 		//菜单
 		if(menu.getType() == Constant.MenuType.MENU.getValue()){
 			if(StringUtils.isBlank(menu.getUrl())){
 				throw new RRException("菜单URL不能为空");
 			}
 		}
-
+		
 		//上级菜单类型
 		int parentType = Constant.MenuType.CATALOG.getValue();
 		if(menu.getParentId() != 0){
 			SysMenuEntity parentMenu = sysMenuService.getById(menu.getParentId());
 			parentType = parentMenu.getType();
 		}
-
+		
 		//目录、菜单
 		if(menu.getType() == Constant.MenuType.CATALOG.getValue() ||
 				menu.getType() == Constant.MenuType.MENU.getValue()){
@@ -187,7 +179,7 @@ public class SysMenuController {
 			}
 			return ;
 		}
-
+		
 		//按钮
 		if(menu.getType() == Constant.MenuType.BUTTON.getValue()){
 			if(parentType != Constant.MenuType.MENU.getValue()){

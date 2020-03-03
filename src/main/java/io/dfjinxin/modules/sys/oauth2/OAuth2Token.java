@@ -17,26 +17,19 @@ import org.apache.shiro.authc.AuthenticationToken;
  * @author Mark sunlightcs@gmail.com
  */
 public class OAuth2Token implements AuthenticationToken {
-    private Object principal;
-
-    private String credentials;
+    private String token;
 
     public OAuth2Token(String token){
-        this.credentials = token;
-    }
-
-    public OAuth2Token(String token,Object principal){
-        this.credentials = token;
-        this.principal = principal;
+        this.token = token;
     }
 
     @Override
-    public Object getPrincipal() {
-        return principal;
+    public String getPrincipal() {
+        return token;
     }
 
     @Override
-    public String getCredentials() {
-        return credentials;
+    public Object getCredentials() {
+        return token;
     }
 }

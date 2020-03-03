@@ -13,14 +13,12 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.dfjinxin.modules.sys.entity.SysConfigEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 /**
  * 系统配置信息
  *
  * @author Mark sunlightcs@gmail.com
  */
-@Repository
 @Mapper
 public interface SysConfigDao extends BaseMapper<SysConfigEntity> {
 

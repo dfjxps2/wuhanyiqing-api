@@ -11,7 +11,6 @@ package io.dfjinxin.modules.sys.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.dfjinxin.modules.sys.entity.SysUserEntity;
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -20,7 +19,6 @@ import java.util.List;
  *
  * @author Mark sunlightcs@gmail.com
  */
-@Repository
 @Mapper
 public interface SysUserDao extends BaseMapper<SysUserEntity> {
 	
@@ -28,7 +26,7 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
 	 * 查询用户的所有权限
 	 * @param userId  用户ID
 	 */
-	List<String> queryAllPerms(String userId);
+	List<String> queryAllPerms(Long userId);
 	
 	/**
 	 * 查询用户的所有菜单ID
@@ -39,10 +37,5 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
 	 * 根据用户名，查询系统用户
 	 */
 	SysUserEntity queryByUserName(String username);
-
-	/**
-	 * 根据用户名删除用户
-	 */
-	void deleteByUserName(String username);
 
 }

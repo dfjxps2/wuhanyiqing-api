@@ -22,7 +22,7 @@ public interface ShiroService {
     /**
      * 获取用户权限列表
      */
-    Set<String> getUserPermissions(String userId);
+    Set<String> getUserPermissions(long userId);
 
     SysUserTokenEntity queryByToken(String token);
 
@@ -31,8 +31,4 @@ public interface ShiroService {
      * @param userId
      */
     SysUserEntity queryUser(Long userId);
-
-    SysUserEntity queryUserByName(String userName);
-
-    void removeUserDBCache(String userName);
 }

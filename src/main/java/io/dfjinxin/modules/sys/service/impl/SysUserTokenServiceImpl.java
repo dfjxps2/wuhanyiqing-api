@@ -16,7 +16,6 @@ import io.dfjinxin.modules.sys.oauth2.TokenGenerator;
 import io.dfjinxin.modules.sys.service.SysUserTokenService;
 import org.springframework.stereotype.Service;
 
-import java.util.Calendar;
 import java.util.Date;
 
 
@@ -27,7 +26,7 @@ public class SysUserTokenServiceImpl extends ServiceImpl<SysUserTokenDao, SysUse
 
 
 	@Override
-	public R createToken(String userId) {
+	public R createToken(long userId) {
 		//生成一个token
 		String token = TokenGenerator.generateValue();
 
@@ -48,27 +47,12 @@ public class SysUserTokenServiceImpl extends ServiceImpl<SysUserTokenDao, SysUse
 			//保存token
 			this.save(tokenEntity);
 		}else{
-//			tokenEntity.setToken(token);
-//			tokenEntity.setUpdateTime(now);
-//			tokenEntity.setExpireTime(expireTime);
-//
-//			//更新token
-//			this.updateById(tokenEntity);
+			tokenEntity.setToken(token);
+			tokenEntity.setUpdateTime(now);
+			tokenEntity.setExpireTime(expireTime);
 
-			Calendar expireTimeCal = Calendar.getInstance();
-			expireTimeCal.setTime(tokenEntity.getExpireTime());
-
-			Calendar currTimeCal = Calendar.getInstance();
-			currTimeCal.setTime(now);
-
-			if(expireTimeCal.before(currTimeCal)){
-				tokenEntity.setUpdateTime(now);
-				tokenEntity.setExpireTime(expireTime);
-				this.updateById(tokenEntity);
-			}
-
-
-			token = tokenEntity.getToken();
+			//更新token
+			this.updateById(tokenEntity);
 		}
 
 		R r = R.ok().put("token", token).put("expire", EXPIRE);
@@ -77,7 +61,7 @@ public class SysUserTokenServiceImpl extends ServiceImpl<SysUserTokenDao, SysUse
 	}
 
 	@Override
-	public void logout(String userId) {
+	public void logout(long userId) {
 		//生成一个token
 		String token = TokenGenerator.generateValue();
 

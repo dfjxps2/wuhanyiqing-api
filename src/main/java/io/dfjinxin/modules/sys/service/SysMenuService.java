@@ -10,7 +10,6 @@ package io.dfjinxin.modules.sys.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import io.dfjinxin.modules.sys.entity.GovRootMenuEntity;
 import io.dfjinxin.modules.sys.entity.SysMenuEntity;
 
 import java.util.List;
@@ -50,13 +49,4 @@ public interface SysMenuService extends IService<SysMenuEntity> {
 	 * 删除
 	 */
 	void delete(Long menuId);
-
-	/**
-	 * 从太极获取用户菜单
-	 * @param userId
-	 * @return
-	 */
-	List<GovRootMenuEntity> getMenuFromGovAuth(Long userId);
-
-	List<Long> queryAllMenuId(Long userId);
 }
