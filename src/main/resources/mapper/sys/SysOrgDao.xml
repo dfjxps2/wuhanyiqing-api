@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.sys.dao.SysOrgDao">
+
+	<select id="queryListParentId" resultType="io.dfjinxin.modules.sys.entity.SysOrgEntity">
+		select * from sys_org where parent_id = #{parentId} order by order_num asc
+	</select>
+
+	<select id="queryNotButtonList" resultType="io.dfjinxin.modules.sys.entity.SysOrgEntity">
+		select * from sys_org  order by order_num asc
+	</select>
+
+</mapper>
