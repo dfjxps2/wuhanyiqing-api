@@ -41,7 +41,7 @@
         ac.appeal_channel_desc,
         ks.keep_status_desc
         from t01_detained_person_info info
-        left join t99_detained_person_type pt on info.Detained_person_status_cd = pt.Detained_person_type_cd
+        left join t99_detained_person_type pt on info.Detained_person_type_cd = pt.Detained_person_type_cd
         left join t99_appeal_type at on info.appeal_channel_cd = at.appeal_type_cd
         left join t99_detained_person_status dps on dps.Detained_person_status_cd=info.Detained_person_status_cd
         left join t99_appeal_channel ac on ac.appeal_channel_cd=info.appeal_channel_cd
@@ -53,6 +53,22 @@
         <if test="param.keepStatusCd != null and param.keepStatusCd!= ''">
             AND info.keep_status_cd = #{param.keepStatusCd}
         </if>
+    </select>
+
+    <select id="queryDetailById" resultMap="t01DetainedPersonInfoMap">
+        SELECT info.*,
+        pt.Detained_person_type_desc,
+        at.appeal_type_desc,
+        dps.Detained_person_status_desc,
+        ac.appeal_channel_desc,
+        ks.keep_status_desc
+        from t01_detained_person_info info
+        left join t99_detained_person_type pt on info.Detained_person_type_cd = pt.Detained_person_type_cd
+        left join t99_appeal_type at on info.appeal_channel_cd = at.appeal_type_cd
+        left join t99_detained_person_status dps on dps.Detained_person_status_cd=info.Detained_person_status_cd
+        left join t99_appeal_channel ac on ac.appeal_channel_cd=info.appeal_channel_cd
+        left join t99_keep_status ks on ks.keep_status_cd=info.keep_status_cd
+        WHERE info.id=#{id}
     </select>
 
 

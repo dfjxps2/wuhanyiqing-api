@@ -17,5 +17,6 @@ public interface T01DetainedPersonInfoService extends IService<T01DetainedPerson
 
     PageUtils queryPage(Map<String, Object> params);
 
+    T01DetainedPersonInfoEntity queryById(String id);
 }
 

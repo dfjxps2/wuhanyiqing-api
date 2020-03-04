@@ -20,6 +20,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import io.swagger.annotations.Api;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -62,12 +63,13 @@ import io.dfjinxin.modules.outsider.entity.MyPager;
 
 /**
  * 滞汉外地人明细 controller
- * 
+ *
  * @author zhujiazhou
  *
  */
 @RestController
 @RequestMapping("/outsider")
+@Api(tags = "导出&导入")
 public class OutsiderController {
 
 	@Autowired
@@ -103,7 +105,7 @@ public class OutsiderController {
 
 	/**
 	 * 下载Excel模板
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@GetMapping("/excel/export")
@@ -465,7 +467,7 @@ public class OutsiderController {
 
 	/**
 	 * 获取数据表的行列索引
-	 * 
+	 *
 	 * @param sheet
 	 * @return
 	 */

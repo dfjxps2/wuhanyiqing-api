@@ -70,9 +70,8 @@ public class DataIntoController extends AbstractController {
      */
     @GetMapping("/info/{id}")
     @ApiOperation(value = "链接到详细页面", notes = "参数为主键id")
-//    @RequiresPermissions("analyse:t01detainedpersoninfo:info")
     public R info(@PathVariable("id") String id) {
-        T01DetainedPersonInfoEntity t01DetainedPersonInfo = t01DetainedPersonInfoService.getById(id);
+        T01DetainedPersonInfoEntity t01DetainedPersonInfo = t01DetainedPersonInfoService.queryById(id);
 
         return R.ok().put("t01DetainedPersonInfo", t01DetainedPersonInfo);
     }

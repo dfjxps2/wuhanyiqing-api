@@ -35,4 +35,6 @@ public interface T01DetainedPersonInfoDao extends BaseMapper<T01DetainedPersonIn
 //            "</if>" +
 //            "</script>")
     IPage<T01DetainedPersonInfoEntity> queryPage(Page page, @Param("param") Map map);
+
+    T01DetainedPersonInfoEntity queryDetailById(@Param("id") Long id);
 }

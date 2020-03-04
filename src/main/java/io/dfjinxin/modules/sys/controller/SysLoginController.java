@@ -14,6 +14,7 @@ import io.dfjinxin.modules.sys.form.SysLoginForm;
 import io.dfjinxin.modules.sys.service.SysCaptchaService;
 import io.dfjinxin.modules.sys.service.SysUserService;
 import io.dfjinxin.modules.sys.service.SysUserTokenService;
+import io.swagger.annotations.Api;
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import java.util.Map;
  *
  * @author Mark sunlightcs@gmail.com
  */
+@Api(tags = "系统登录")
 @RestController
 public class SysLoginController extends AbstractController {
 	@Autowired
@@ -96,5 +98,5 @@ public class SysLoginController extends AbstractController {
 		sysUserTokenService.logout(getUserId());
 		return R.ok();
 	}
-	
+
 }

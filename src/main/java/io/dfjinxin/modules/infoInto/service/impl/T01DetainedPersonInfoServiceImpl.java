@@ -27,4 +27,15 @@ public class T01DetainedPersonInfoServiceImpl extends ServiceImpl<T01DetainedPer
         page = (Page) super.baseMapper.queryPage(page, params);
         return new PageUtils(page);
     }
+
+    /**
+     * 根据id查询详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public T01DetainedPersonInfoEntity queryById(String id) {
+        return baseMapper.queryDetailById(new Long(id));
+    }
 }
