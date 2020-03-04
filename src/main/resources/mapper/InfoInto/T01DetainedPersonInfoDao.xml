@@ -16,21 +16,29 @@
         <result property="detainedPersonStatusCd" column="Detained_person_status_cd"/>
         <result property="appealChannelCd" column="appeal_channel_cd"/>
         <result property="resetMode" column="reset_mode"/>
-        <result property="appealTypeCd" column="appeal_type_cd"/>
         <result property="submitUserId" column="submit_user_id"/>
         <result property="reviewUserId" column="review_user_id"/>
+        <result property="orderName" column="order_name"/>
+        <result property="salveDateEnd" column="salve_date_end"/>
+        <result property="salveDateStat" column="salve_date_stat"/>
+        <result property="salveAmount" column="salve_amount"/>
+        <result property="placeAreaCd" column="place_area_cd"/>
         <result property="submitDate" column="submit_date"/>
         <result property="reviewDate" column="review_date"/>
         <result property="commitDate" column="commit_date"/>
+        <result property="uptDate" column="upt_date"/>
+        <result property="isUser" column="is_user"/>
         <result property="keepStatusCd" column="keep_status_cd"/>
-        <result property="detainedInfo" column="Detained_info"/>
+        <result property="detainedPersonStatusAi" column="Detained_person_status_ai"/>
+        <result property="resetModeAi" column="reset_mode_ai"/>
+        <result property="bz" column="bz"/>
 
         <result property="detainedPersonTypeDesc" column="Detained_person_type_desc"/>
         <result property="detainedPersonStatusDesc" column="Detained_person_status_desc"/>
         <result property="appealTypeDesc" column="appeal_type_desc"/>
         <result property="appealChannelDesc" column="appeal_channel_desc"/>
         <result property="keepstatusDesc" column="keep_status_desc"/>
-        <result property="bz" column="bz"/>
+        <result property="areaDesc" column="area_desc"/>
     </resultMap>
 
     <select id="queryPage" resultMap="t01DetainedPersonInfoMap">
@@ -39,13 +47,22 @@
         at.appeal_type_desc,
         dps.Detained_person_status_desc,
         ac.appeal_channel_desc,
-        ks.keep_status_desc
-        from t01_detained_person_info info
-        left join t99_detained_person_type pt on info.Detained_person_type_cd = pt.Detained_person_type_cd
-        left join t99_appeal_type at on info.appeal_channel_cd = at.appeal_type_cd
-        left join t99_detained_person_status dps on dps.Detained_person_status_cd=info.Detained_person_status_cd
-        left join t99_appeal_channel ac on ac.appeal_channel_cd=info.appeal_channel_cd
-        left join t99_keep_status ks on ks.keep_status_cd=info.keep_status_cd
+        ks.keep_status_desc,
+        user1.username as submitUser,
+        user2.username as reviewUser
+        FROM t01_detained_person_info info
+        LEFT JOIN t99_detained_person_type pt
+        ON info.Detained_person_type_cd = pt.Detained_person_type_cd
+        LEFT JOIN t99_appeal_type at
+        ON info.appeal_channel_cd = at.appeal_type_cd
+        LEFT JOIN t99_detained_person_status dps
+        ON dps.Detained_person_status_cd = info.Detained_person_status_cd
+        LEFT JOIN t99_appeal_channel ac
+        ON ac.appeal_channel_cd = info.appeal_channel_cd
+        LEFT JOIN t99_keep_status ks
+        ON ks.keep_status_cd = info.keep_status_cd
+        left join sys_user user1 on user1.user_id = info.submit_user_id
+        left join sys_user user2 on user2.user_id = info.review_user_id
         WHERE 1=1
         <if test="param.submitDate != null and param.submitDate!= ''">
             and info.submit_date=#{param.submitDate}
@@ -61,13 +78,15 @@
         at.appeal_type_desc,
         dps.Detained_person_status_desc,
         ac.appeal_channel_desc,
-        ks.keep_status_desc
+        ks.keep_status_desc,
+        area.area_desc
         from t01_detained_person_info info
         left join t99_detained_person_type pt on info.Detained_person_type_cd = pt.Detained_person_type_cd
         left join t99_appeal_type at on info.appeal_channel_cd = at.appeal_type_cd
         left join t99_detained_person_status dps on dps.Detained_person_status_cd=info.Detained_person_status_cd
         left join t99_appeal_channel ac on ac.appeal_channel_cd=info.appeal_channel_cd
         left join t99_keep_status ks on ks.keep_status_cd=info.keep_status_cd
+        left join t99_area area on area.area_cd=info.place_area_cd
         WHERE info.id=#{id}
     </select>
 

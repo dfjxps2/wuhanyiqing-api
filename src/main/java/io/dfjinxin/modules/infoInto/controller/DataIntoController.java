@@ -6,6 +6,8 @@ import io.dfjinxin.common.validator.ValidatorUtils;
 import io.dfjinxin.modules.infoInto.entity.T01DetainedPersonInfoEntity;
 import io.dfjinxin.modules.infoInto.service.T01DetainedPersonInfoService;
 import io.dfjinxin.modules.sys.controller.AbstractController;
+import io.dfjinxin.modules.sys.entity.SysUserEntity;
+import io.dfjinxin.modules.sys.service.SysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -31,6 +33,9 @@ public class DataIntoController extends AbstractController {
 
     @Autowired
     private T01DetainedPersonInfoService t01DetainedPersonInfoService;
+
+    @Autowired
+    private SysUserService sysUserService;
 
     /**
      * 列表
@@ -72,7 +77,14 @@ public class DataIntoController extends AbstractController {
     @ApiOperation(value = "链接到详细页面", notes = "参数为主键id")
     public R info(@PathVariable("id") String id) {
         T01DetainedPersonInfoEntity t01DetainedPersonInfo = t01DetainedPersonInfoService.queryById(id);
-
+        if (t01DetainedPersonInfo != null) {
+//        审核用户编号
+            SysUserEntity reViewUser = sysUserService.getById(t01DetainedPersonInfo.getReviewUserId());
+//        填报用户编号
+            SysUserEntity submitUser = sysUserService.getById(t01DetainedPersonInfo.getSubmitUserId());
+            t01DetainedPersonInfo.setSubmitUser(submitUser.getUsername());
+            t01DetainedPersonInfo.setReviewUser(reViewUser.getUsername());
+        }
         return R.ok().put("t01DetainedPersonInfo", t01DetainedPersonInfo);
     }
 
@@ -85,6 +97,9 @@ public class DataIntoController extends AbstractController {
         ValidatorUtils.validateEntity(t01DetainedPersonInfo);
         t01DetainedPersonInfo.setKeepStatusCd("1");
         t01DetainedPersonInfo.setSubmitDate(new Date());
+        Long userId = super.getUserId();
+        SysUserEntity user = sysUserService.getById(userId);
+        t01DetainedPersonInfo.setOrderName(user.getUsername());
         t01DetainedPersonInfoService.save(t01DetainedPersonInfo);
 
         return R.ok();
@@ -107,10 +122,13 @@ public class DataIntoController extends AbstractController {
         entity.setKeepStatusCd(keepStatusCd.toString());
         if (keepStatusCd == 2) {
             entity.setCommitDate(new Date());
+            entity.setSubmitUserId(super.getUserId().toString());
         }
         if (keepStatusCd == 3) {
             entity.setReviewDate(new Date());
+            entity.setReviewUserId(super.getUserId().toString());
         }
+        entity.setUptDate(new Date());
         t01DetainedPersonInfoService.updateById(entity);
 
         return R.ok();
@@ -124,6 +142,7 @@ public class DataIntoController extends AbstractController {
     @ApiOperation("修改上报对象信息")
 //    @RequiresPermissions("analyse:t01detainedpersoninfo:update")
     public R updateInfo(@RequestBody T01DetainedPersonInfoEntity t01DetainedPersonInfo) {
+        t01DetainedPersonInfo.setUptDate(new Date());
         t01DetainedPersonInfoService.updateById(t01DetainedPersonInfo);
 
         return R.ok();
