@@ -38,8 +38,8 @@ public class DataIntoController extends AbstractController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageIndex", value = "页码", required = false, dataType = "int", paramType = "query"),
             @ApiImplicitParam(name = "pageSize", value = "返回数据集", required = false, dataType = "int", paramType = "query"),
-            @ApiImplicitParam(name = "keepStatusCd", value = "填报日志", required = false, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "submitDate", value = "记录状态", required = false, dataType = "int", paramType = "query"),
+            @ApiImplicitParam(name = "keepStatusCd", value = "记录状态", required = false, dataType = "int", paramType = "query"),
+            @ApiImplicitParam(name = "submitDate", value = "填报日期", required = false, dataType = "String", paramType = "query"),
     })
     public R queryDataSourcesList(
             @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
