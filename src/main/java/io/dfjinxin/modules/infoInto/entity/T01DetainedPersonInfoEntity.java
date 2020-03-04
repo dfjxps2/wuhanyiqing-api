@@ -1,5 +1,6 @@
 package io.dfjinxin.modules.infoInto.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -100,5 +101,35 @@ public class T01DetainedPersonInfoEntity implements Serializable {
 	 * 备注
 	 */
 	private String bz;
+
+	/**
+	 * 滞留人员类型描述
+	 */
+	@TableField(exist = false)
+	private String detainedPersonTypeDesc;
+
+	/**
+	 * 滞留人员状态描述
+	 */
+	@TableField(exist = false)
+	private String detainedPersonStatusDesc;
+
+	/**
+	 *诉求类型描述
+	 */
+	@TableField(exist = false)
+	private String appealTypeDesc;
+
+	/**
+	 *诉求渠道描述
+	 */
+	@TableField(exist = false)
+	private String appealChannelDesc;
+
+	/**
+	 *记录状态描述
+	 */
+	@TableField(exist = false)
+	private String keepstatusDesc;
 
 }

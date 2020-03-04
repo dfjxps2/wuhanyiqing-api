@@ -24,11 +24,28 @@
         <result property="commitDate" column="commit_date"/>
         <result property="keepStatusCd" column="keep_status_cd"/>
         <result property="detainedInfo" column="Detained_info"/>
+
+        <result property="detainedPersonTypeDesc" column="Detained_person_type_desc"/>
+        <result property="detainedPersonStatusDesc" column="Detained_person_status_desc"/>
+        <result property="appealTypeDesc" column="appeal_type_desc"/>
+        <result property="appealChannelDesc" column="appeal_channel_desc"/>
+        <result property="keepstatusDesc" column="keep_status_desc"/>
         <result property="bz" column="bz"/>
     </resultMap>
 
     <select id="queryPage" resultMap="t01DetainedPersonInfoMap">
-        SELECT info.* from t01_detained_person_info info
+        SELECT info.*,
+        pt.Detained_person_type_desc,
+        at.appeal_type_desc,
+        dps.Detained_person_status_desc,
+        ac.appeal_channel_desc,
+        ks.keep_status_desc
+        from t01_detained_person_info info
+        left join t99_detained_person_type pt on info.Detained_person_status_cd = pt.Detained_person_type_cd
+        left join t99_appeal_type at on info.appeal_channel_cd = at.appeal_type_cd
+        left join t99_detained_person_status dps on dps.Detained_person_status_cd=info.Detained_person_status_cd
+        left join t99_appeal_channel ac on ac.appeal_channel_cd=info.appeal_channel_cd
+        left join t99_keep_status ks on ks.keep_status_cd=info.keep_status_cd
         WHERE 1=1
         <if test="param.submitDate != null and param.submitDate!= ''">
             and info.submit_date=#{param.submitDate}

@@ -8,9 +8,12 @@ spring:
 #            username: cleanse_sys
 #            password: cleanse_sys
 #            资源中心环境
-            url: jdbc:mysql://10.1.3.93:3306/wuhan?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
-            username: wuhan_user
-            password: 123456
+#            url: jdbc:mysql://10.1.3.93:3306/wuhan?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+#            username: wuhan_user
+#            password: 123456
+            url: jdbc:mysql://localhost:3306/wuhan?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+            username: root
+            password: root
             initial-size: 10
             max-active: 100
             min-idle: 10
@@ -37,6 +40,10 @@ spring:
                 wall:
                     config:
                         multi-statement-allow: true
+
+
+
+
 #远程ssh系统参数
 #system-params:
 #    ssh-host: 172.26.52.168
@@ -53,10 +60,10 @@ spring:
 #    sh-exec-mode: remote
 #    sql-dialect: hive
 
-#CA认证中心配置
-gov-redirect:
-    cleanse-web-url = http://172.26.52.168:8095/dataprocess-web/caLogin
-    desensitize-web-url = http://172.26.52.168:8095/dataprocess-web/caLogin
+##CA认证中心配置
+#gov-redirect:
+#    cleanse-web-url = http://172.26.52.168:8095/dataprocess-web/caLogin
+#    desensitize-web-url = http://172.26.52.168:8095/dataprocess-web/caLogin
 
 ##hive数据源
 #hive:
