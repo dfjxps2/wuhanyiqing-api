@@ -21,7 +21,7 @@ public class ReadTest2 {
         final Reader reader = SimpleReaderTemplate.newInstance();
         String[] header = { "序号","姓名","电话","身份证号","报告日期","区县","滞留人员类型","当地居住地址","诉求类型","安置方式","目的城市","详情","备注" };//text2.xlsx
         String tableTile="区当日新增滞汉外地人明细反馈表";
-        final InputStream is = new FileInputStream(new File("D:\\MyData\\WuHanReport\\write_text2.xlsx"));//武汉外地人滞留明细.xlsx
+        final InputStream is = new FileInputStream(new File("D:\\MyData\\WuHanReport\\武汉外地人滞留明细_江汉.xlsx"));//武汉外地人滞留明细.xlsx
         final List<ESheet> sheets = reader.read(is);
         //int dataTableIndex=0;
         for(final ESheet sheet: sheets){
