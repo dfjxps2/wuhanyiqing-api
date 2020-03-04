@@ -42,7 +42,7 @@
 		<quartz.version>2.3.0</quartz.version>
 		<poi.version>3.14</poi.version>
 		<!--打包时跳过测试-->
-		<!--<skipTests>true</skipTests>-->
+		<skipTests>true</skipTests>
 		<!--打包名称-->
 		<projectname>wuhanyiqing-api</projectname>
 
@@ -70,10 +70,10 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.boot</groupId>-->
-<!--			<artifactId>spring-boot-starter-data-redis</artifactId>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
@@ -234,17 +234,17 @@
 			<version>2.1.7</version>
 		</dependency>
 		<!-- 定时任务 -->
-<!--		<dependency>-->
-<!--			<groupId>org.quartz-scheduler</groupId>-->
-<!--			<artifactId>quartz</artifactId>-->
-<!--			<version>${quartz.version}</version>-->
-<!--			<exclusions>-->
-<!--				<exclusion>-->
-<!--					<groupId>com.mchange</groupId>-->
-<!--					<artifactId>c3p0</artifactId>-->
-<!--				</exclusion>-->
-<!--			</exclusions>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>${quartz.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.mchange</groupId>
+					<artifactId>c3p0</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.hive</groupId>
@@ -340,6 +340,18 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
 			<version>4.5.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.qcloud</groupId>
+			<artifactId>cos_api</artifactId>
+			<version>${qcloud.cos.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 	</dependencies>
