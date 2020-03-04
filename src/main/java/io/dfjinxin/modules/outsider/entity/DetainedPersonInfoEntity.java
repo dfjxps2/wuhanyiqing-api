@@ -1,6 +1,7 @@
 package io.dfjinxin.modules.outsider.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -40,17 +41,17 @@ public class DetainedPersonInfoEntity  implements Serializable {
 	
 	//备用yyyy-MM-dd HH:mm:ss
 	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
-	private String submitDate;//填报日期
+	private Date submitDate;//填报日期
 	
 	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
-	private String commitDate;//提交日期
+	private Date commitDate;//提交日期
 	
 	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
-	private String reviewDate;//审核日期
+	private Date reviewDate;//审核日期
 	
-	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private String submitUserId;//填报用户编号
 	private String telephone;//电话
+	
 	public String getId() {
 		return id;
 	}
@@ -135,22 +136,23 @@ public class DetainedPersonInfoEntity  implements Serializable {
 	public void setReviewUserId(String reviewUserId) {
 		this.reviewUserId = reviewUserId;
 	}
-	public String getSubmitDate() {
+	
+	public Date getSubmitDate() {
 		return submitDate;
 	}
-	public void setSubmitDate(String submitDate) {
+	public void setSubmitDate(Date submitDate) {
 		this.submitDate = submitDate;
 	}
-	public String getCommitDate() {
+	public Date getCommitDate() {
 		return commitDate;
 	}
-	public void setCommitDate(String commitDate) {
+	public void setCommitDate(Date commitDate) {
 		this.commitDate = commitDate;
 	}
-	public String getReviewDate() {
+	public Date getReviewDate() {
 		return reviewDate;
 	}
-	public void setReviewDate(String reviewDate) {
+	public void setReviewDate(Date reviewDate) {
 		this.reviewDate = reviewDate;
 	}
 	public String getSubmitUserId() {
