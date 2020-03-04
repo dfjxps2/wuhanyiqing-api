@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
@@ -40,6 +41,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson.JSONObject;
 
 import io.dfjinxin.common.utils.R;
+import io.dfjinxin.modules.outsider.entity.Constant;
 import io.dfjinxin.modules.outsider.entity.DetainedPersonInfoEntity;
 import io.dfjinxin.modules.outsider.entity.PersonEntity;
 import io.dfjinxin.modules.outsider.entity.Test1Model;
@@ -207,7 +209,13 @@ public class OutsiderController {
 								int columIndex = cell.getColumnIndex() - tableIndex.getColumnIndex();
 								if (!header[columIndex].equals(value)) {
 									if (columIndex == 0) {
-										e.setId(value.toString());
+										String idStr = value.toString();
+										if(idStr==null||"".equals(idStr)) {
+											idStr = UUID.randomUUID().toString();
+									        //去掉“-”符号 
+											idStr=idStr.replaceAll("-", "");
+										}
+										e.setId(idStr);
 									} else if (columIndex == 1) {
 										e.setDetainedName(value.toString());
 									} else if (columIndex == 2) {
@@ -219,11 +227,19 @@ public class OutsiderController {
 									} else if (columIndex == 5) {
 										e.setAreaCd(value.toString());
 									} else if (columIndex == 6) {
-										e.setDetainedPersonTypeCd(value.toString());
+										String vStr = Constant.detainedPersonTypeCdValueOfKey.get(value.toString());
+										if(vStr==null||"".equals(vStr)) {
+											vStr ="7";
+										}
+										e.setDetainedPersonTypeCd(vStr);/////////////
 									} else if (columIndex == 7) {
 										e.setAddress(value.toString());
 									} else if (columIndex == 8) {
-										e.setAppealTypeCd(value.toString());
+										String vStr = Constant.appealTypeCdValueOfKey.get(value.toString());
+										if(vStr==null||"".equals(vStr)) {
+											vStr ="6";
+										}
+										e.setAppealTypeCd(vStr);/////////////////
 									} else if (columIndex == 9) {
 										e.setResetMode(value.toString());
 									} else if (columIndex == 10) {
@@ -275,9 +291,19 @@ public class OutsiderController {
 			data[3] = pp.getCardNumber();
 			data[4] = pp.getSubmitDate();
 			data[5] = pp.getAreaCd();
-			data[6] = pp.getDetainedPersonTypeCd();
+			String dptStr = Constant.detainedPersonTypeCdKv.get(pp.getDetainedPersonTypeCd());
+			if(dptStr==null||"".equals(dptStr)) {
+				dptStr ="其它人员";
+			}
+			//data[6] = pp.getDetainedPersonTypeCd();
+			data[6] =dptStr;
 			data[7] = pp.getAddress();
-			data[8] = pp.getAppealTypeCd();
+			String acStr = Constant.appealTypeCdKv.get(pp.getAppealTypeCd());
+			if(acStr==null||"".equals(acStr)) {
+				acStr ="其他诉求";
+			}
+			//data[8] = pp.getAppealTypeCd();
+			data[8] = acStr;
 			data[9] = pp.getResetMode();
 			data[10] = pp.getDestCity();
 			data[11] = pp.getDetainedInfo();
