@@ -21,8 +21,8 @@ public class DetainedPersonInfoEntity  implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	@TableId(type=IdType.INPUT)
-	private String id;//序号,
+	@TableId(type=IdType.AUTO)
+	private Integer id;//序号,
 	private String address;//当地居住地址
 	private String appealChannelCd;//诉求渠道代码
 	private String appealTypeCd;//诉求类型代码
@@ -52,10 +52,10 @@ public class DetainedPersonInfoEntity  implements Serializable {
 	private String submitUserId;//填报用户编号
 	private String telephone;//电话
 	
-	public String getId() {
+	public Integer getId() {
 		return id;
 	}
-	public void setId(String id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 	public String getAddress() {

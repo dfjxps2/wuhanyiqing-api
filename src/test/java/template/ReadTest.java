@@ -46,7 +46,7 @@ public class ReadTest {
                 			 if(!header[columIndex].equals(value)) {
                 				 System.out.println("列："+columIndex+"  "+header[columIndex]+" ==>"+value+"       值类型==========>"+value.getClass());
                 				if(columIndex==0) {
-                					e.setId(value.toString());
+                					//e.setId(value.toString());
                 				}else if(columIndex==1) {
                 					e.setDetainedName(value.toString());
                 				}else if(columIndex==2) {
