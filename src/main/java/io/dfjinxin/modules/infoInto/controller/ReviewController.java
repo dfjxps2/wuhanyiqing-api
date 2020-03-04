@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/review")
-@Api(tags = "市管理员审核-页面")
+//@Api(tags = "市管理员审核-页面")
 public class ReviewController extends AbstractController {
 
 }
