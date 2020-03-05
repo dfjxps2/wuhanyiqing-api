@@ -112,10 +112,8 @@ public class OutsiderController {
 	@ResponseBody
 	public String importData(@RequestParam("file") MultipartFile file) {
 		Reader reader = SimpleReaderTemplate.newInstance();
-		String[] header = { "序号", "姓名", "电话", "身份证号", "报告日期", "区县", "滞留人员类型", "当地居住地址", "诉求类型", "安置方式", "目的城市", "详情",
-				"备注" };// text2.xlsx
-		String tableTile = "（XX）区当日新增滞汉外地人明细反馈表";
-		// 将文件传到C盘的Excel文件夹下
+		String[] header = { "序号", "姓名", "电话", "身份证号", "报告日期", "行政县", "滞留人员类型", "当地居住地址","户籍地","安置方式", "目的城市", "救助金额","救助开始日期","救助结束日期","经办人","负责人",
+				"备注" };//"诉求类型"和“详情”废弃
 		try {
 			InputStream is = file.getInputStream();
 			List<ESheet> sheets = reader.read(is);
@@ -158,19 +156,36 @@ public class OutsiderController {
 										e.setDetainedPersonTypeCd(vStr);/////////////
 									} else if (columIndex == 7) {
 										e.setAddress(value.toString());
-									} else if (columIndex == 8) {
-										String vStr = Constant.appealTypeCdValueOfKey.get(value.toString());
-										if(vStr==null||"".equals(vStr)) {
-											vStr ="6";
-										}
-										e.setAppealTypeCd(vStr);/////////////////
-									} else if (columIndex == 9) {
+									} //else if (columIndex == 8) {
+										//String vStr = Constant.appealTypeCdValueOfKey.get(value.toString());
+										//if(vStr==null||"".equals(vStr)) {
+										//	vStr ="6";
+									//	}
+									//	e.setAppealTypeCd(vStr);/////////////////
+									//}
+									else if (columIndex == 8) {///////////////////////////////////////////////////////////////添加 户籍地：
+										//e.setResetMode(value.toString());
+										e.setPlaceAreaCd(value.toString());
+									} 
+									else if (columIndex == 9) {
 										e.setResetMode(value.toString());
-									} else if (columIndex == 10) {
+									}else if (columIndex == 10) {
 										e.setDestCity(value.toString());
 									} else if (columIndex == 11) {
-										e.setDetainedInfo(value.toString());
+								//		e.setDetainedInfo(value.toString());
+										e.setSalveAmount((Double)value);//救助金额
 									} else if (columIndex == 12) {
+										//e.setBz(value.toString());
+										e.setSalveDateStat((Date)value);//救助开始日期
+									}else if (columIndex == 13) {
+//										e.setBz(value.toString());
+										e.setSalveDateEnd((Date)value);//救助结束日期
+									}else if (columIndex == 14) {
+										//	e.setBz(value.toString());
+										e.setSubmitUserId(value.toString());//经办人
+									}else if (columIndex == 15) {
+										e.setOrderName(value.toString());//负责人
+									}else if (columIndex == 16) {
 										e.setBz(value.toString());
 									}
 									entityList.add(e);
@@ -195,6 +210,7 @@ public class OutsiderController {
 	@ResponseBody
 	public ResponseEntity<byte[]> exportData(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		// 接受的是UTF-8
 		req.setCharacterEncoding("utf-8");
 		// 获取文件名
@@ -202,18 +218,18 @@ public class OutsiderController {
 		HttpHeaders headers = null;
 		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 		List<DetainedPersonInfoEntity> list = personService.list();
-		String[] header = { "序号", "姓名", "电话", "身份证号", "报告日期", "区县", "滞留人员类型", "当地居住地址", "诉求类型", "安置方式", "目的城市", "详情",
-				"备注" };// text2.xlsx
-		String tableTile = "（XX）区当日新增滞汉外地人明细反馈表";
+		String[] header = { "序号", "姓名", "电话", "身份证号", "报告日期", "行政县", "滞留人员类型", "当地居住地址","户籍地","安置方式", "目的城市", "救助金额","救助开始日期","救助结束日期","经办人","负责人",
+				"备注" };//  "诉求类型"和"详情" 字段废弃
+		String tableTile = "滞汉外地人清单";
 		PersonEntity head = new PersonEntity(header);
 		List<PersonEntity> body = new ArrayList<PersonEntity>();
 		list.forEach(pp -> {
-			Object[] data = new Object[13];
+			Object[] data = new Object[17];
 			data[0] = pp.getId();
 			data[1] = pp.getDetainedName();
 			data[2] = pp.getTelephone();
 			data[3] = pp.getCardNumber();
-			data[4] = pp.getSubmitDate();
+			data[4] =pp.getSubmitDate()==null?"":sdf.format(pp.getSubmitDate());
 			data[5] = pp.getAreaCd();
 			String dptStr = Constant.detainedPersonTypeCdKv.get(pp.getDetainedPersonTypeCd());
 			if(dptStr==null||"".equals(dptStr)) {
@@ -222,22 +238,43 @@ public class OutsiderController {
 			//data[6] = pp.getDetainedPersonTypeCd();
 			data[6] =dptStr;
 			data[7] = pp.getAddress();
-			String acStr = Constant.appealTypeCdKv.get(pp.getAppealTypeCd());
-			if(acStr==null||"".equals(acStr)) {
-				acStr ="其他诉求";
-			}
+			//String acStr = Constant.appealTypeCdKv.get(pp.getAppealTypeCd());
+		//	if(acStr==null||"".equals(acStr)) {
+			//String	acStr ="其他诉求";
+			//}
 			//data[8] = pp.getAppealTypeCd();
-			data[8] = acStr;
-			data[9] = pp.getResetMode();
-			data[10] = pp.getDestCity();
-			data[11] = pp.getDetainedInfo();
-			data[12] = pp.getBz();
+			data[8] =  pp.getPlaceAreaCd();
+			data[9] =  pp.getResetMode();
+			data[10] =pp.getDestCity();
+			data[11] =pp.getSalveAmount();//救助金额 //"此字段废弃";//pp.getDetainedInfo();
+			data[12] =pp.getSalveDateStat()==null?"":sdf.format(pp.getSalveDateStat());//救助开始日期
+			data[13]=pp.getSalveDateEnd()==null?"":sdf.format(pp.getSalveDateEnd());//救助结束日期
+			data[14]=pp.getSubmitUserId();//经办人：取提交用户姓名
+			data[15]=pp.getOrderName();//负责人
+			data[16]=pp.getBz();//备注
 			body.add(new PersonEntity(data));
 		});
 		Pager pager = new MyPager(tableTile, head, body);
 		EasyTemplate t = TemplateFactory.createTemplate(SimpleTemplate.class, pager);
 		Config config = t.getConfig(0);
-		config.setDefaultWidth(Config.DEFAULT_WIDTH + 5);
+		config.setDefaultWidth(Config.DEFAULT_WIDTH *5);
+		config.addRowHeight(0, 30f);
+		config.addColumnWidth(0, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(1, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(2, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(3, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(4, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(5, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(6, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(7, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(8, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(9, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(10, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(11, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(12, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(3, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(14, Config.DEFAULT_WIDTH*2);
+		config.addColumnWidth(15, Config.DEFAULT_WIDTH*2);
 		try {
 			System.out.println(filename);// myfiles
 			// file =new File(path);
@@ -254,10 +291,6 @@ public class OutsiderController {
 		}
 		return new ResponseEntity<byte[]>(bOut.toByteArray(), headers, HttpStatus.OK);
 	}
-
-
-
-
 
 	public byte[] fileToBytes(String filePath) {
 		byte[] buffer = null;
@@ -302,10 +335,8 @@ public class OutsiderController {
 	 * @return
 	 */
 	private DataTableInde getDataTableIndex(ESheet sheet) {
-		int dataTableIndex = 0;
 		DataTableInde index = new DataTableInde();
-		String tableTile = "区当日新增滞汉外地人明细反馈表";
-		// String[] header = { "周一", "周二", "周三", "周四", "周五", "周六", "周日" };//text2.xlsx
+		String tableTile = "滞汉外地人清单";
 		for (final ERow row : sheet.getRows()) {
 			for (final ECell cell : row.getCells()) {
 				if (cell.getValue() != null && !"".equals(cell.getValue())) {
@@ -313,7 +344,6 @@ public class OutsiderController {
 					if (value instanceof String) {
 						String valueStr = (String) value;
 						if (valueStr.contains(tableTile)) {
-							dataTableIndex = cell.getColumnIndex();
 							index.setColumnIndex(cell.getColumnIndex());
 							index.setRowIndex(cell.getRowIndex() + 1);
 						}
