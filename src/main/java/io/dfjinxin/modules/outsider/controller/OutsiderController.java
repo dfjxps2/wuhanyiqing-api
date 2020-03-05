@@ -123,13 +123,16 @@ public class OutsiderController {
 				DataTableInde tableIndex = getDataTableIndex(sheet);
 				// System.out.println("dataTableIndex2:"+tableIndex.getColumnIndex());
 				for (final ERow row : sheet.getRows()) {
-					DetainedPersonInfoEntity e = new DetainedPersonInfoEntity();
+					if(row.getRowIndex()>tableIndex.getRowIndex()){
+					DetainedPersonInfoEntity e =null;
 					for (final ECell cell : row.getCells()) {
 						if (cell.getValue() != null && !"".equals(cell.getValue())) {
 							Object value = cell.getValue();
 							if (cell.getRowIndex() >= tableIndex.getRowIndex()) {
 								int columIndex = cell.getColumnIndex() - tableIndex.getColumnIndex();
 								if (!header[columIndex].equals(value)) {
+									if(e==null)
+									    e = new DetainedPersonInfoEntity();
 									if (columIndex == 0) {
 									//	String idStr = value.toString();
 										//if(idStr==null||"".equals(idStr)) {
@@ -188,12 +191,15 @@ public class OutsiderController {
 									}else if (columIndex == 16) {
 										e.setBz(value.toString());
 									}
-									entityList.add(e);
+									
 								}
 							}
 						}
+						
 					}
-				}
+					if(e!=null)
+					      entityList.add(e);
+				}}
 				personService.saveBatch(entityList, entityList.size());
 			}
 			// 获取文件名称
