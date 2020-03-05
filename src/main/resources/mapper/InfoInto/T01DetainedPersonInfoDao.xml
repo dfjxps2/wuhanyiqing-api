@@ -38,7 +38,9 @@
         <result property="appealTypeDesc" column="appeal_type_desc"/>
         <result property="appealChannelDesc" column="appeal_channel_desc"/>
         <result property="keepstatusDesc" column="keep_status_desc"/>
+<!--
         <result property="areaDesc" column="area_desc"/>
+-->
     </resultMap>
 
     <select id="queryPage" resultMap="t01DetainedPersonInfoMap">
@@ -49,7 +51,9 @@
         ac.appeal_channel_desc,
         ks.keep_status_desc,
         user1.username as submitUser,
-        user2.username as reviewUser
+        user2.username as reviewUser,
+        area.area_desc as placeAreaDesc,
+        org.name as areaDesc
         FROM t01_detained_person_info info
         LEFT JOIN t99_detained_person_type pt
         ON info.Detained_person_type_cd = pt.Detained_person_type_cd
@@ -63,12 +67,19 @@
         ON ks.keep_status_cd = info.keep_status_cd
         left join sys_user user1 on user1.user_id = info.submit_user_id
         left join sys_user user2 on user2.user_id = info.review_user_id
+        /*武汉行政区*/
+        left join sys_org org on org.org_id=info.area_cd
+        /*全国省份*/
+        left join t99_area area on area.area_cd = info.place_area_cd
         WHERE 1=1
         <if test="param.submitDate != null and param.submitDate!= ''">
             and info.submit_date=#{param.submitDate}
         </if>
         <if test="param.keepStatusCd != null and param.keepStatusCd!= ''">
             AND info.keep_status_cd = #{param.keepStatusCd}
+        </if>
+        <if test="param.currUserId != null and param.currUserId!= ''">
+            AND info.submit_user_id = #{param.currUserId}
         </if>
     </select>
 
@@ -79,14 +90,18 @@
         dps.Detained_person_status_desc,
         ac.appeal_channel_desc,
         ks.keep_status_desc,
-        area.area_desc
+        area.area_desc as placeAreaDesc,
+        org.name as areaDesc
         from t01_detained_person_info info
         left join t99_detained_person_type pt on info.Detained_person_type_cd = pt.Detained_person_type_cd
         left join t99_appeal_type at on info.appeal_channel_cd = at.appeal_type_cd
         left join t99_detained_person_status dps on dps.Detained_person_status_cd=info.Detained_person_status_cd
         left join t99_appeal_channel ac on ac.appeal_channel_cd=info.appeal_channel_cd
         left join t99_keep_status ks on ks.keep_status_cd=info.keep_status_cd
-        left join t99_area area on area.area_cd=info.place_area_cd
+        /*武汉行政区*/
+        left join sys_org org on org.org_id=info.area_cd
+        /*全国省份*/
+        left join t99_area area on area.area_cd = info.place_area_cd
         WHERE info.id=#{id}
     </select>
 

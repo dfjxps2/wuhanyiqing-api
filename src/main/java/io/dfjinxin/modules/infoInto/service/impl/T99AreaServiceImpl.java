@@ -1,7 +1,10 @@
 package io.dfjinxin.modules.infoInto.service.impl;
 
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,6 +27,13 @@ public class T99AreaServiceImpl extends ServiceImpl<T99AreaDao, T99AreaEntity> i
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public List<T99AreaEntity> queryList() {
+        QueryWrapper where = new QueryWrapper();
+        where.ne("area_level", "2");
+        return baseMapper.selectList(where);
     }
 
 }

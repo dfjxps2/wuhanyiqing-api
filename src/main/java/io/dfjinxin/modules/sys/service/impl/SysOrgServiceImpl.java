@@ -9,6 +9,7 @@
 package io.dfjinxin.modules.sys.service.impl;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.dfjinxin.common.utils.Constant;
 import io.dfjinxin.common.utils.MapUtils;
@@ -103,4 +104,12 @@ public class SysOrgServiceImpl extends ServiceImpl<SysOrgDao, SysOrgEntity> impl
 
 		return subMenuList;
 	}
+
+	@Override
+    public List<SysOrgEntity> queryOrg() {
+        QueryWrapper where = new QueryWrapper();
+        where.ne("parent_id", 0);
+        where.orderByAsc("org_id");
+        return baseMapper.selectList(where);
+    }
 }

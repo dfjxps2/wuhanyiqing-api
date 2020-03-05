@@ -34,12 +34,12 @@ public interface SysOrgService extends IService<SysOrgEntity> {
 	 * @param parentId 父组织机构ID
 	 */
 	List<SysOrgEntity> queryListParentId(Long parentId);
-	
+
 	/**
 	 * 获取不包含按钮的组织机构列表
 	 */
 	List<SysOrgEntity> queryNotButtonList();
-	
+
 	/**
 	 * 获取用户组织机构列表
 	 */
@@ -49,4 +49,7 @@ public interface SysOrgService extends IService<SysOrgEntity> {
 	 * 删除
 	 */
 	void delete(Long orgId);
+
+
+	public List<SysOrgEntity> queryOrg();
 }

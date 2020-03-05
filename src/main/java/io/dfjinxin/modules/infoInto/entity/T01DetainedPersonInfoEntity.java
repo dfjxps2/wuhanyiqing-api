@@ -28,9 +28,13 @@ public class T01DetainedPersonInfoEntity implements Serializable {
     @TableId
     private Long id;
     /**
-     * 行政区划代码
+     * 武汉市-行政区划代码
      */
     private String areaCd;
+    /**
+     * 省份代码
+     */
+    private String placeAreaCd;
     /**
      * 姓名
      */
@@ -91,10 +95,7 @@ public class T01DetainedPersonInfoEntity implements Serializable {
      * 救助金额
      */
     private BigDecimal salveAmount;
-    /**
-     * 户籍行政区划代码
-     */
-    private String placeAreaCd;
+
     /**
      * 填报日期
      */
@@ -163,12 +164,6 @@ public class T01DetainedPersonInfoEntity implements Serializable {
     private String keepstatusDesc;
 
     /**
-     * 区县描述
-     */
-    @TableField(exist = false)
-    private String areaDesc;
-
-    /**
      * 填报用户
      */
     @TableField(exist = false)
@@ -179,5 +174,17 @@ public class T01DetainedPersonInfoEntity implements Serializable {
      */
     @TableField(exist = false)
     private String reviewUser;
+
+    /**
+     * 武汉行政区描述
+     */
+    @TableField(exist = false)
+    private String areaDesc;
+
+    /**
+     * 省份描述
+     */
+    @TableField(exist = false)
+    private String placeAreaDesc;
 
 }
