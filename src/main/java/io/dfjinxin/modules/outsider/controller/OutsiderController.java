@@ -39,8 +39,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 import io.dfjinxin.common.utils.R;
+import io.dfjinxin.common.utils.ShiroUtils;
+import io.dfjinxin.modules.infoInto.dao.T99AreaDao;
+import io.dfjinxin.modules.infoInto.entity.T99AreaEntity;
 import io.dfjinxin.modules.outsider.entity.Constant;
 import io.dfjinxin.modules.outsider.entity.DetainedPersonInfoEntity;
 import io.dfjinxin.modules.outsider.entity.PersonEntity;
@@ -60,6 +65,7 @@ import io.dfjinxin.modules.outsider.excel.templates.SimpleReaderTemplate;
 import io.dfjinxin.modules.outsider.excel.templates.SimpleTemplate;
 import io.dfjinxin.modules.outsider.excel.utils.StyleDecorate;
 import io.dfjinxin.modules.outsider.service.DetainedPersonInfoService;
+import io.dfjinxin.modules.sys.entity.SysUserEntity;
 import io.swagger.annotations.ApiOperation;
 import io.dfjinxin.modules.outsider.entity.MyPager;
 
@@ -76,6 +82,9 @@ public class OutsiderController {
 
 	@Autowired
 	private DetainedPersonInfoService personService;
+	
+	@Autowired
+	private T99AreaDao areaDao;
 
 	/**
 	 * 最大导入数量
@@ -111,6 +120,7 @@ public class OutsiderController {
 	@PostMapping("/excel/import")
 	@ResponseBody
 	public String importData(@RequestParam("file") MultipartFile file) {
+		SysUserEntity userEntity = ShiroUtils.getUserEntity();
 		Reader reader = SimpleReaderTemplate.newInstance();
 		String[] header = { "序号", "姓名", "电话", "身份证号", "报告日期", "行政县", "滞留人员类型", "当地居住地址","户籍地","安置方式", "目的城市", "救助金额","救助开始日期","救助结束日期","经办人","负责人",
 				"备注" };//"诉求类型"和“详情”废弃
@@ -131,8 +141,10 @@ public class OutsiderController {
 							if (cell.getRowIndex() >= tableIndex.getRowIndex()) {
 								int columIndex = cell.getColumnIndex() - tableIndex.getColumnIndex();
 								if (!header[columIndex].equals(value)) {
-									if(e==null)
+									if(e==null){
 									    e = new DetainedPersonInfoEntity();
+									    e.setKeepStatusCd("1");    
+									}
 									if (columIndex == 0) {
 									//	String idStr = value.toString();
 										//if(idStr==null||"".equals(idStr)) {
@@ -150,7 +162,8 @@ public class OutsiderController {
 									} else if (columIndex == 4) {
 										e.setSubmitDate((Date) value);
 									} else if (columIndex == 5) {
-										e.setAreaCd(value.toString());
+										//e.setAreaCd(value.toString());//根据ID
+										e.setAreaCd(userEntity.getOrgId());
 									} else if (columIndex == 6) {
 										String vStr = Constant.detainedPersonTypeCdValueOfKey.get(value.toString());
 										if(vStr==null||"".equals(vStr)) {
@@ -168,7 +181,9 @@ public class OutsiderController {
 									//}
 									else if (columIndex == 8) {///////////////////////////////////////////////////////////////添加 户籍地：
 										//e.setResetMode(value.toString());
-										e.setPlaceAreaCd(value.toString());
+										//e.setPlaceAreaCd(value.toString());
+										//转码：名->编码
+										e.setPlaceAreaCd(getAreaCd(value.toString()));
 									} 
 									else if (columIndex == 9) {
 										e.setResetMode(value.toString());
@@ -184,8 +199,9 @@ public class OutsiderController {
 //										e.setBz(value.toString());
 										e.setSalveDateEnd((Date)value);//救助结束日期
 									}else if (columIndex == 14) {
-										//	e.setBz(value.toString());
-										e.setSubmitUserId(value.toString());//经办人
+										//	e.setBz(value.toString());修改
+										//e.setSubmitUserId(value.toString());//经办人
+										e.setSubmitUserId(Long.toString(userEntity.getUserId()));
 									}else if (columIndex == 15) {
 										e.setOrderName(value.toString());//负责人
 									}else if (columIndex == 16) {
@@ -216,6 +232,7 @@ public class OutsiderController {
 	@ResponseBody
 	public ResponseEntity<byte[]> exportData(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		SysUserEntity userEntity = ShiroUtils.getUserEntity();
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		// 接受的是UTF-8
 		req.setCharacterEncoding("utf-8");
@@ -223,7 +240,10 @@ public class OutsiderController {
 		String filename = "result.xlsx";
 		HttpHeaders headers = null;
 		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-		List<DetainedPersonInfoEntity> list = personService.list();
+		QueryWrapper<DetainedPersonInfoEntity> queryWrapper =new QueryWrapper<DetainedPersonInfoEntity>();
+        queryWrapper.eq("submit_user_id", userEntity.getUserId());
+        List<DetainedPersonInfoEntity> list = personService.list(queryWrapper);
+		//List<DetainedPersonInfoEntity> list = personService.list();
 		String[] header = { "序号", "姓名", "电话", "身份证号", "报告日期", "行政县", "滞留人员类型", "当地居住地址","户籍地","安置方式", "目的城市", "救助金额","救助开始日期","救助结束日期","经办人","负责人",
 				"备注" };//  "诉求类型"和"详情" 字段废弃
 		String tableTile = "滞汉外地人清单";
@@ -236,7 +256,7 @@ public class OutsiderController {
 			data[2] = pp.getTelephone();
 			data[3] = pp.getCardNumber();
 			data[4] =pp.getSubmitDate()==null?"":sdf.format(pp.getSubmitDate());
-			data[5] = pp.getAreaCd();
+			data[5] =userEntity.getOrgName();//pp.getAreaCd();
 			String dptStr = Constant.detainedPersonTypeCdKv.get(pp.getDetainedPersonTypeCd());
 			if(dptStr==null||"".equals(dptStr)) {
 				dptStr ="其它人员";
@@ -249,13 +269,14 @@ public class OutsiderController {
 			//String	acStr ="其他诉求";
 			//}
 			//data[8] = pp.getAppealTypeCd();
-			data[8] =  pp.getPlaceAreaCd();
+			//data[8] =  pp.getPlaceAreaCd();
+			data[8] =getAreaDesc(pp.getPlaceAreaCd());//户籍地转码
 			data[9] =  pp.getResetMode();
 			data[10] =pp.getDestCity();
 			data[11] =pp.getSalveAmount();//救助金额 //"此字段废弃";//pp.getDetainedInfo();
 			data[12] =pp.getSalveDateStat()==null?"":sdf.format(pp.getSalveDateStat());//救助开始日期
 			data[13]=pp.getSalveDateEnd()==null?"":sdf.format(pp.getSalveDateEnd());//救助结束日期
-			data[14]=pp.getSubmitUserId();//经办人：取提交用户姓名
+			data[14]=userEntity.getUsername();//pp.getSubmitUserId();//经办人：取提交用户姓名
 			data[15]=pp.getOrderName();//负责人
 			data[16]=pp.getBz();//备注
 			body.add(new PersonEntity(data));
@@ -359,5 +380,37 @@ public class OutsiderController {
 			}
 		}
 		return index;
+	}
+	/**
+	 * 根据 根据行政性 名，获取行政区划代码
+	 * @param areaDesc
+	 * @return
+	 */
+	private String getAreaCd(String areaDesc){
+		
+		 QueryWrapper<T99AreaEntity> queryWrapper = new QueryWrapper<>();
+	        queryWrapper.like("area_desc", areaDesc);
+		T99AreaEntity selectOne = areaDao.selectOne(queryWrapper);
+		String res=areaDesc;
+		if(selectOne!=null){
+			res=selectOne.getAreaCd();
+		}
+			res=areaDesc;
+		return res;
+	}
+	/**
+	 * 根据 根据行政性 名，获取行政区划代码
+	 * @param areaDesc
+	 * @return
+	 */
+	private String getAreaDesc(String areaCd){
+		 QueryWrapper<T99AreaEntity> queryWrapper = new QueryWrapper<>();
+	        queryWrapper.like("area_cd", areaCd);
+		T99AreaEntity selectOne = areaDao.selectOne(queryWrapper);
+		String res=areaCd;
+		if(selectOne!=null){
+			res=selectOne.getAreaDesc();
+		}
+		return res;
 	}
 }
