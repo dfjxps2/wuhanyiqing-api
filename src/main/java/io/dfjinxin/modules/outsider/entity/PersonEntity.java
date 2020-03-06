@@ -16,6 +16,10 @@ public class PersonEntity  extends Record{
     private Object t11;
     private Object t12;
     private Object t13;
+    private Object t14;
+    private Object t15;
+    private Object t16;
+    private Object t17;
     
     public PersonEntity(final Object[] objs){
         t1 = objs[0];
@@ -31,5 +35,9 @@ public class PersonEntity  extends Record{
         t11 = objs[10];
         t12 = objs[11];
         t13 = objs[12];
+        t14 = objs[13];
+        t15 = objs[14];
+        t16 = objs[15];
+        t17 = objs[16];
     }
 }
