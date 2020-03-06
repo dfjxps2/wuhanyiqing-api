@@ -28,7 +28,7 @@ public class ReadTest {
         System.out.println(name);
         DataTableInde tableIndex = getDataTableIndex(sheet);
     	System.out.println("dataTableIndex2:"+tableIndex.getColumnIndex());
-    	
+
             for(final ERow row: sheet.getRows()){
             	DetainedPersonInfoEntity e=new DetainedPersonInfoEntity();
                 for(final ECell cell: row.getCells()){
@@ -61,25 +61,25 @@ public class ReadTest {
                 					e.setDetainedPersonTypeCd(value.toString());
                 				}else if(columIndex==7) {
                 					e.setAddress(value.toString());
-                				}else if(columIndex==8) {
+                				}/*else if(columIndex==8) {
                 					e.setAppealTypeCd(value.toString());
-                				}else if(columIndex==9) {
+                				}*/else if(columIndex==9) {
                 					e.setResetMode(value.toString());
                 				}else if(columIndex==10) {
                 					e.setDestCity(value.toString());
-                				}else if(columIndex==11) {
+                				}/*else if(columIndex==11) {
                 					e.setDetainedInfo(value.toString());
-                				}else if(columIndex==12) {
+                				}*/else if(columIndex==12) {
                 					e.setBz(value.toString());
                 				}
-                				
-                					
+
+
                 			 }
-                			
+
                 		 }
-                		 
+
                 	}
-                 
+
                 }
             }
         }
@@ -102,7 +102,7 @@ public class ReadTest {
                  			}
                  		}
                  	}
-                  
+
                  }
              }
     	     return index;

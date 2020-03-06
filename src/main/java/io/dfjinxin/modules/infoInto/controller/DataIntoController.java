@@ -111,13 +111,18 @@ public class DataIntoController extends AbstractController {
     @PostMapping("/save")
     @ApiOperation("新增")
     public R save(@RequestBody T01DetainedPersonInfoEntity t01DetainedPersonInfo) {
+
+        logger.info("新增-填报对象:" + JSON.toJSONString(t01DetainedPersonInfo));
         ValidatorUtils.validateEntity(t01DetainedPersonInfo);
 
         Long userId = super.getUserId();
         SysUserEntity user = sysUserService.getById(userId);
         //新增为“1”
         t01DetainedPersonInfo.setKeepStatusCd("1");
-        t01DetainedPersonInfo.setSubmitDate(new Date());
+        if (t01DetainedPersonInfo.getSubmitDate() == null) {
+            t01DetainedPersonInfo.setSubmitDate(new Date());
+        }
+
         //填报用户编号
         t01DetainedPersonInfo.setSubmitUserId(userId.toString());
         //经办人/负责人 填报人名称
