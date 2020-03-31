@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.infoInto.dao.LevPersonDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.infoInto.entity.LevPerson" id="levPersonMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="phone" column="phone"/>
+        <result property="cardType" column="card_type"/>
+        <result property="cardNum" column="card_num"/>
+        <result property="levCity" column="lev_city"/>
+        <result property="levTime" column="lev_time"/>
+        <result property="levBy" column="lev_by"/>
+        <result property="zoneCd" column="zone_cd"/>
+        <result property="createTime" column="CREATE_time"/>
+    </resultMap>
+
+    <!-- 分页查询 -->
+    <select id="queryPage" resultMap="levPersonMap">
+        SELECT * from lev_person
+    </select>
+
+</mapper>

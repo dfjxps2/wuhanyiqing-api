@@ -27,7 +27,7 @@ public class SysLogServiceImpl extends ServiceImpl<SysLogDao, SysLogEntity> impl
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
-        String key = (String)params.get("key");
+        String key = (String)params.get("userName");
 
         IPage<SysLogEntity> page = this.page(
             new Query<SysLogEntity>().getPage(params),
