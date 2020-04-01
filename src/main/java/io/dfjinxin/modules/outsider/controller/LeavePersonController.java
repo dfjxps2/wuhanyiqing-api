@@ -170,7 +170,8 @@ public class LeavePersonController {
 		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 		QueryWrapper<LeavePerson> queryWrapper =new QueryWrapper<LeavePerson>();
 		String zoneCdStr = Constant.zoneCdKv.get(userEntity.getUsername());
-		if("admin".equals(userEntity.getUsername())){
+		//管理员名称由admin修改为wh_admin
+		if("wh_admin".equals(userEntity.getUsername())){
 			list = leavePersonService.list();
 		}else{
 	        queryWrapper.eq("zone_cd",zoneCdStr);
