@@ -1,6 +1,7 @@
 package io.dfjinxin.modules.infoInto.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.dfjinxin.common.utils.Key2Name;
 import io.dfjinxin.common.utils.PageUtils;
 import io.dfjinxin.common.utils.R;
@@ -18,9 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 /**
  * @Desc:
@@ -35,8 +35,6 @@ import java.util.stream.Stream;
 public class LevPersonController extends AbstractController {
     @Autowired
     private LevPersonService levPersonService;
-//    @Autowired
-//    private SysUserService sysUserService;
 
     /**
      * 保存
@@ -54,6 +52,20 @@ public class LevPersonController extends AbstractController {
         return R.ok();
     }
 
+
+   /* @PostMapping("/queryByEntry")
+    @ApiOperation("查询test")
+    public R query(@RequestBody LevPerson entry) {
+
+        log.info("新增-离吧人员:" + JSON.toJSONString(entry));
+        LambdaQueryWrapper<LevPerson> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper
+                .eq(!StringUtils.isEmpty(entry.getName()), LevPerson::getName, entry.getName())
+                .eq(!StringUtils.isEmpty(entry.getPhone()), LevPerson::getPhone, entry.getPhone());
+        List<LevPerson> list = levPersonService.list(queryWrapper);
+        return R.ok().put("data", list);
+    }*/
+
     /**
      * 列表
      */
@@ -69,24 +81,10 @@ public class LevPersonController extends AbstractController {
     ) {
         log.info("pageIndex:" + pageIndex);
         log.info("pageSize:" + pageSize);
-//        log.info("查询对象:" + JSON.toJSONString(entry));
-
 
         Map<String, Object> params = new HashMap();
         params.put("pageIndex", pageIndex);
         params.put("pageSize", pageSize);
-
-       /* SysUserEntity user = sysUserService.getById(super.getUserId());
-        logger.info("*********当前登录用户信息:" + JSON.toJSONString(user));
-        if (user != null) {
-            String adminUser = user.getUsername();
-            //暂定这两个是管理员，可以查询所有用户提交的数据。其它用户只能看到自己填报的数据
-            if (!"admin".equals(adminUser) && !"wh_admin".equals(adminUser)) {
-//                params.put("loginUserId", "");
-                params.put("currUserId", super.getUserId().toString());
-            }
-        }*/
-
         PageUtils page = levPersonService.queryPage(params);
         return R.ok().put("page", page);
     }
