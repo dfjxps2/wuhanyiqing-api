@@ -22,11 +22,19 @@ public class LeavePerson {
 	private String cardType;//证件类型
 	private String cardNum;//证据号码
 	private String levTime; //离汉时间
-	private String levCity;// '返回省市',
+	//private String levCity;// '返回省市',
 	private String levBy;//返程方式
 	private String zoneCd;//区id
 	   @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date createTime;//创建时间
+	   
+	   //////////////////////////////////////////需求修改二 开始///////////////////////////////////////
+		private String hj;//户籍
+		private String levLiveType;//滞留居住方式
+		private String levLiveAddress;//滞留居住地址；
+		private String backProvince;//返回省
+		private String backCity;//返回市
+//////////////////////////////////////////需求修改二 结束///////////////////////////////////////
 	public Integer getId() {
 		return id;
 	}
@@ -63,12 +71,12 @@ public class LeavePerson {
 	public void setLevTime(String levTime) {
 		this.levTime = levTime;
 	}
-	public String getLevCity() {
+/*	public String getLevCity() {
 		return levCity;
 	}
 	public void setLevCity(String levCity) {
 		this.levCity = levCity;
-	}
+	}*/
 	public String getLevBy() {
 		return levBy;
 	}
@@ -86,6 +94,36 @@ public class LeavePerson {
 	}
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
+	}
+	public String getHj() {
+		return hj;
+	}
+	public void setHj(String hj) {
+		this.hj = hj;
+	}
+	public String getLevLiveType() {
+		return levLiveType;
+	}
+	public void setLevLiveType(String levLiveType) {
+		this.levLiveType = levLiveType;
+	}
+	public String getLevLiveAddress() {
+		return levLiveAddress;
+	}
+	public void setLevLiveAddress(String levLiveAddress) {
+		this.levLiveAddress = levLiveAddress;
+	}
+	public String getBackProvince() {
+		return backProvince;
+	}
+	public void setBackProvince(String backProvince) {
+		this.backProvince = backProvince;
+	}
+	public String getBackCity() {
+		return backCity;
+	}
+	public void setBackCity(String backCity) {
+		this.backCity = backCity;
 	}
 	
 	

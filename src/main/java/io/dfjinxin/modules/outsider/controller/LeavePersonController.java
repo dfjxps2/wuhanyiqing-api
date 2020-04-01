@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -75,7 +74,14 @@ public class LeavePersonController {
 		SysUserEntity userEntity = ShiroUtils.getUserEntity();
 		String zoneCdStr = Constant.zoneCdKv.get(userEntity.getUsername());
 		Reader reader = SimpleReaderTemplate.newInstance();
-		String[] header = {"序号", "姓名", "电话	", "证件类型", "身份证号", "	离汉时间", "返回省市	", "返程方式", "区", "创建时间"};
+		//									0			1				2					3				4						5
+		String[] header = {"序号", "姓名", "电话	", "证件类型", "身份证号", "	离汉时间", 
+				//6					7								8
+				"户籍地", "滞汉居住方式	", "滞汉居住地址",
+				//		9				10
+				"返回省份","返回市",
+				//11				12		13
+				"返程方式", "区", "创建时间"};
 		try {
 			InputStream is = file.getInputStream();
 			List<ESheet> sheets = reader.read(is);
@@ -107,12 +113,25 @@ public class LeavePersonController {
 									} else if (columIndex == 5) {
 										e.setLevTime(value.toString());
 									} else if (columIndex == 6) {
-										e.setLevCity(value.toString());
+										//e.setLevCity(value.toString());
+										e.setHj(value.toString());
 									} else if (columIndex == 7) {
-										e.setLevBy(value.toString());
+										//e.setLevCity(value.toString());
+										e.setLevLiveType(value.toString());
 									} else if (columIndex == 8) {
-										e.setZoneCd(zoneCdStr);
+										//e.setLevCity(value.toString());
+										e.setLevLiveAddress(value.toString());
 									} else if (columIndex == 9) {
+										//e.setLevCity(value.toString());
+										e.setBackProvince(value.toString());
+									} else if (columIndex == 10) {
+										//e.setLevCity(value.toString());
+										e.setBackCity(value.toString());
+									} else if (columIndex == 11) {
+										e.setLevBy(value.toString());
+									} else if (columIndex == 12) {
+										e.setZoneCd(zoneCdStr);
+									} else if (columIndex == 13) {
 										e.setCreateTime(new Date());
 									}
 									
@@ -177,22 +196,33 @@ public class LeavePersonController {
 	        queryWrapper.eq("zone_cd",zoneCdStr);
 	       list = leavePersonService.list(queryWrapper);
 		}
-		String[] header = {"序号", "	姓名", "电话", "证件类型", "身份证号", "离汉时间", "返回省市	", "返程方式", "区", "创建时间"};
+		//									0			1				2					3				4						5
+		String[] header = {"序号", "姓名", "电话	", "证件类型", "身份证号", "	离汉时间", 
+				//6					7								8
+				"户籍地", "滞汉居住方式	", "滞汉居住地址",
+				//		9				10
+				"返回省份","返回市",
+				//11				12		13
+				"返程方式", "区", "创建时间"};
 		String tableTile = "已离汉人员信息清单";
 		LeavePersonEntity head = new LeavePersonEntity(header);
 		List<LeavePersonEntity> body = new ArrayList<LeavePersonEntity>();
 		list.forEach(pp -> {
-			Object[] data = new Object[17];
+			Object[] data = new Object[14];
 			data[0] = pp.getId();
 			data[1] = pp.getName();
 			data[2] =pp.getPhone();
 			data[3] = pp.getCardType();
 			data[4] = pp.getCardNum();
 			data[5] =pp.getLevTime();
-			data[6] =pp.getLevCity();
-			data[7] =pp.getLevBy();
-			data[8] = pp.getZoneCd();
-			data[9] =  pp.getCreateTime()==null?"":sdf.format(pp.getCreateTime());
+			data[6] =pp.getHj();
+			data[7] =pp.getLevLiveType();
+			data[8] =pp.getLevLiveAddress();
+			data[9] =pp.getBackProvince();
+			data[10] =pp.getBackCity();
+			data[11] =pp.getLevBy();
+			data[12] = pp.getZoneCd();
+			data[13] =  pp.getCreateTime()==null?"":sdf.format(pp.getCreateTime());
 			body.add(new LeavePersonEntity(data));
 		});
 		Pager pager = new MyPager(tableTile, head, body);

@@ -1,7 +1,12 @@
 package io.dfjinxin.modules.outsider.entity;
 
 import io.dfjinxin.modules.outsider.excel.model.Record;
-
+/**
+ * 离开武汉的人 controller
+ *
+ * @author zhujiazhou
+ *
+ */
 public class LeavePersonEntity  extends Record{
     private Object t1;
     private Object t2;
@@ -13,6 +18,10 @@ public class LeavePersonEntity  extends Record{
     private Object t8;
     private Object t9;
     private Object t10;
+    private Object t11;
+    private Object t12;
+    private Object t13;
+    private Object t14;
 
     
     public LeavePersonEntity(final Object[] objs){
@@ -26,5 +35,10 @@ public class LeavePersonEntity  extends Record{
         t8 = objs[7];
         t9 = objs[8];
         t10 = objs[9];
+        t11 = objs[10];
+        t12 = objs[11];
+        t13 = objs[12];
+        t14 = objs[13];
+        
     }
 }
