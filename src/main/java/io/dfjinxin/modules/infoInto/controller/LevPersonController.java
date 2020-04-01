@@ -13,11 +13,14 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * @Desc:
@@ -44,7 +47,9 @@ public class LevPersonController extends AbstractController {
 
         log.info("新增-离吧人员:" + JSON.toJSONString(entry));
         ValidatorUtils.validateEntity(entry);
-        entry.setZoneCd(Key2Name.getNameByKey(entry.getZoneCd().trim()));
+        if (!StringUtils.isEmpty(entry.getZoneCd())) {
+            entry.setZoneCd(Key2Name.getNameByKey(entry.getZoneCd().trim()));
+        }
         levPersonService.save(entry);
         return R.ok();
     }
