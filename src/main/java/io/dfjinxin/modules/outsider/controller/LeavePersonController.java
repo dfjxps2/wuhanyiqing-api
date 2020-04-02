@@ -6,10 +6,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+
 import io.dfjinxin.common.utils.ShiroUtils;
 import io.dfjinxin.modules.outsider.entity.Constant;
 import io.dfjinxin.modules.outsider.entity.LeavePerson;
@@ -53,7 +58,7 @@ import io.dfjinxin.modules.outsider.entity.MyPager;
 /**
  * 离开武汉的人 controller
  *
- * @author zhujiazhou
+ * @author zhujiazhou2.0
  *
  */
 @RestController
@@ -71,13 +76,16 @@ public class LeavePersonController {
 	@PostMapping("/excel/import")
 	@ResponseBody
 	public String importData(@RequestParam("file") MultipartFile file) {
+		Map<String,String>  resultMap=new HashMap<String,String>();
+		StringBuffer buffer= new StringBuffer();
+		String errorStr="错误记录";
 		SysUserEntity userEntity = ShiroUtils.getUserEntity();
 		String zoneCdStr = Constant.zoneCdKv.get(userEntity.getUsername());
 		Reader reader = SimpleReaderTemplate.newInstance();
 		//									0			1				2					3				4						5
-		String[] header = {"序号", "姓名", "电话	", "证件类型", "身份证号", "	离汉时间", 
+		String[] header = {"序号", "姓名", "电话", "证件类型", "身份证号", "离汉时间", 
 				//6					7								8
-				"户籍地", "滞汉居住方式	", "滞汉居住地址",
+				"户籍地", "滞汉居住方式", "滞汉居住地址",
 				//		9				10
 				"返回省份","返回市",
 				//11				12		13
@@ -91,41 +99,69 @@ public class LeavePersonController {
 				for (final ERow row : sheet.getRows()) {
 					if(row.getRowIndex()>tableIndex.getRowIndex()){
 						LeavePerson e =null;
+						buffer.delete(0,buffer.length()); 
 					for (final ECell cell : row.getCells()) {
-						if (cell.getValue() != null && !"".equals(cell.getValue())) {
+						//if (cell.getValue() != null && !"".equals(cell.getValue())) {
 							Object value = cell.getValue();
 							if (cell.getRowIndex() >= tableIndex.getRowIndex()) {
 								int columIndex = cell.getColumnIndex() - tableIndex.getColumnIndex();
-								if (!header[columIndex].equals(value)) {
+								ECell indexDataCell = row.getCell(tableIndex.getColumnIndex());
+								Object indexValue=indexDataCell.getValue();
+								if (!header[columIndex].equals(value)&&!value.toString().contains("注意：")) {
+									if (cell.getValue() != null && !"".equals(cell.getValue())) {
 									if(e==null){
 									    e = new LeavePerson();
 									}
 									if (columIndex == 0) {
-									//Nothing to do
+										indexValue=value;
 									} else if (columIndex == 1) {
 										e.setName(value.toString());
 									} else if (columIndex == 2) {
-										e.setPhone(value.toString());
+										String phoneStr=null;
+										if(value instanceof Double){
+										DecimalFormat df = new DecimalFormat("0");
+										phoneStr= df.format(value);
+										}else if(value instanceof String){
+											phoneStr=(String) value;
+										}
+										if(phoneStr.length()!=11){
+											int indexOf = buffer.indexOf(errorStr);
+											if(indexOf<0){
+												String format = String.format(errorStr+"第%d条,", entityList.size()+1);
+												buffer.append(format);
+											}
+											indexOf = buffer.indexOf(header[columIndex]);
+											if(indexOf<0){
+												buffer.append(header[columIndex]+"格式不对-长度必须为11,");
+												}
+										}
+										e.setPhone(phoneStr);//
 									} else if (columIndex == 3) {
 										e.setCardType(value.toString());
 									} else if (columIndex == 4) {
-										e.setCardNum(value.toString());
+										if(value.toString().trim().length()!=18){
+											int indexOf = buffer.indexOf(errorStr);
+											if(indexOf<0){
+												String format = String.format(errorStr+"第%d条,", entityList.size()+1);
+												buffer.append(format);
+											}
+											 indexOf = buffer.indexOf(header[columIndex]);
+											if(indexOf<0){
+												buffer.append(header[columIndex]+"格式不对-长度必须为18,");
+												}
+										}
+										e.setCardNum(value.toString());//
 									} else if (columIndex == 5) {
 										e.setLevTime(value.toString());
 									} else if (columIndex == 6) {
-										//e.setLevCity(value.toString());
 										e.setHj(value.toString());
 									} else if (columIndex == 7) {
-										//e.setLevCity(value.toString());
 										e.setLevLiveType(value.toString());
 									} else if (columIndex == 8) {
-										//e.setLevCity(value.toString());
 										e.setLevLiveAddress(value.toString());
 									} else if (columIndex == 9) {
-										//e.setLevCity(value.toString());
 										e.setBackProvince(value.toString());
 									} else if (columIndex == 10) {
-										//e.setLevCity(value.toString());
 										e.setBackCity(value.toString());
 									} else if (columIndex == 11) {
 										e.setLevBy(value.toString());
@@ -134,23 +170,46 @@ public class LeavePersonController {
 									} else if (columIndex == 13) {
 										e.setCreateTime(new Date());
 									}
-									
+								}else if(indexValue!=null&&!"".equals(indexValue)&&!indexValue.toString().contains("注意：")){
+										int indexOf = buffer.indexOf(errorStr);
+										if(indexOf<0){
+											String format = String.format(errorStr+"第%d条,", entityList.size()+1);
+											buffer.append(format);
+										}
+										indexOf = buffer.indexOf(header[columIndex]);
+										if(indexOf<0){
+											buffer.append(header[columIndex]+"为空,");
+											}
+									}
 								}
 							}
-						}
-						
 					}
+					if(buffer.length()>0)
+						break;
 					if(e!=null)
 					      entityList.add(e);
+				
 				}}
+				if(buffer.length()==0){
+				resultMap.put("rows", Integer.toString(entityList.size()));
 				leavePersonService.saveBatch(entityList, entityList.size());
+				}
 			}
 		} catch (IOException e) {
 			return JSONObject.toJSONString("上传失败");
 		}
-		LogEntity log=new LogEntity(userEntity.getUsername(),new Date(),"导入已离汉信息");
+		if(buffer.length()==0){
+		LogEntity log=new LogEntity(userEntity.getUsername(),new Date(),"成功导入"+resultMap.get("rows")+"条已离汉人员信息");
 		leaveLogService.saveOrUpdate(log);
-		return JSONObject.toJSONString("上传成功");
+		resultMap.put("msg", "成功导入"+resultMap.get("rows")+"条已离汉人员信息");
+		resultMap.put("code", "200");
+		}else{
+			resultMap.put("code", "400");
+			resultMap.put("msg", buffer.toString());
+			LogEntity log=new LogEntity(userEntity.getUsername(),new Date(),"导入已离汉人员信息失败:"+ buffer.toString());
+			leaveLogService.saveOrUpdate(log);
+		}
+		return JSONObject.toJSONString(resultMap);
 	}
 	@ApiOperation(value = "已离汉人员信息Excel模板下载", httpMethod = "GET", notes = "已离汉人员信息Excel模板下载", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	@RequestMapping(value = "/excel/exportExcelTemplate", method = RequestMethod.GET)
@@ -197,9 +256,9 @@ public class LeavePersonController {
 	       list = leavePersonService.list(queryWrapper);
 		}
 		//									0			1				2					3				4						5
-		String[] header = {"序号", "姓名", "电话	", "证件类型", "身份证号", "	离汉时间", 
+		String[] header = {"序号", "姓名", "电话", "证件类型", "身份证号", "离汉时间", 
 				//6					7								8
-				"户籍地", "滞汉居住方式	", "滞汉居住地址",
+				"户籍地", "滞汉居住方式", "滞汉居住地址",
 				//		9				10
 				"返回省份","返回市",
 				//11				12		13
