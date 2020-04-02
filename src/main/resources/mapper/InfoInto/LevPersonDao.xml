@@ -10,16 +10,55 @@
         <result property="phone" column="phone"/>
         <result property="cardType" column="card_type"/>
         <result property="cardNum" column="card_num"/>
-        <result property="levCity" column="lev_city"/>
+        <result property="hj" column="hj"/>
+        <result property="levLiveType" column="lev_live_type"/>
+        <result property="levLiveAddress" column="lev_live_address"/>
+        <result property="backProvince" column="back_province"/>
         <result property="levTime" column="lev_time"/>
         <result property="levBy" column="lev_by"/>
+        <result property="backCity" column="back_city"/>
         <result property="zoneCd" column="zone_cd"/>
         <result property="createTime" column="CREATE_time"/>
     </resultMap>
 
     <!-- 分页查询 -->
     <select id="queryPage" resultMap="levPersonMap">
-        SELECT * from lev_person
+        SELECT pai.* from lev_person pai
+        where 1=1
+        <if test="param.name != null and param.name.trim() != ''">
+            AND pai.name like CONCAT('%',#{param.name},'%')
+        </if>
+        <if test="param.phone != null and param.phone.trim() != ''">
+            AND pai.phone like CONCAT('%',#{param.phone},'%')
+        </if>
+
+        <if test="param.cardType != null and param.cardType.trim() != ''">
+            AND pai.card_type like CONCAT('%',#{param.cardType},'%')
+        </if>
+        <if test="param.hj != null and param.hj.trim() != ''">
+            AND pai.hj like CONCAT('%',#{param.hj},'%')
+        </if>
+        <if test="param.levLiveType != null and param.levLiveType.trim() != ''">
+            AND pai.lev_live_type like CONCAT('%',#{param.levLiveType},'%')
+        </if>
+        <if test="param.levLiveAddress != null and param.levLiveAddress.trim() != ''">
+            AND pai.lev_live_address like CONCAT('%',#{param.levLiveAddress},'%')
+        </if>
+        <if test="param.backProvince != null and param.backProvince.trim() != ''">
+            AND pai.back_province like CONCAT('%',#{param.backProvince},'%')
+        </if>
+        <if test="param.levBy != null and param.levBy.trim() != ''">
+            AND pai.lev_by like CONCAT('%',#{param.levBy},'%')
+        </if>
+        <if test="param.backCity != null and param.backCity.trim() != ''">
+            AND pai.back_city like CONCAT('%',#{param.backCity},'%')
+        </if>
+        <if test="param.zoneCd != null and param.zoneCd.trim() != ''">
+            AND pai.zone_cd like CONCAT('%',#{param.zoneCd},'%')
+        </if>
+        <if test="param.levTime != null and param.levTime.trim() != ''">
+            AND DATE_FORMAT(pai.lev_time,'%y-%m-%d') =  DATE_FORMAT(#{param.levTime} ,'%y-%m-%d')
+        </if>
     </select>
 
 </mapper>

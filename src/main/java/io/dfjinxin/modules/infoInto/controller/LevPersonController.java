@@ -1,25 +1,26 @@
 package io.dfjinxin.modules.infoInto.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.common.collect.Maps;
 import io.dfjinxin.common.utils.Key2Name;
 import io.dfjinxin.common.utils.PageUtils;
 import io.dfjinxin.common.utils.R;
 import io.dfjinxin.common.validator.ValidatorUtils;
 import io.dfjinxin.modules.infoInto.entity.LevPerson;
+import io.dfjinxin.modules.infoInto.entity.LevPersonReqDto;
 import io.dfjinxin.modules.infoInto.service.LevPersonService;
 import io.dfjinxin.modules.sys.controller.AbstractController;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.cglib.beans.BeanMap;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,7 +54,7 @@ public class LevPersonController extends AbstractController {
     }
 
 
-   /* @PostMapping("/queryByEntry")
+ /*   @PostMapping("/queryByEntry")
     @ApiOperation("查询test")
     public R query(@RequestBody LevPerson entry) {
 
@@ -69,23 +70,34 @@ public class LevPersonController extends AbstractController {
     /**
      * 列表
      */
-    @GetMapping("/pageList")
+    @PostMapping("/pageList")
     @ApiOperation("分页查询")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "pageIndex", value = "页码", required = false, dataType = "int", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "返回数据集", required = false, dataType = "int", paramType = "query")
-    })
-    public R queryDataSourcesList(/*@RequestBody(required = false) LevPerson entry,*/
-            @RequestParam(value = "pageIndex", required = false, defaultValue = "1") Integer pageIndex,
-            @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize
-    ) {
-        log.info("pageIndex:" + pageIndex);
-        log.info("pageSize:" + pageSize);
+    public R queryList(@RequestBody LevPersonReqDto reqDto) {
+        log.info("the req reqDto:{}", JSON.toJSONString(reqDto));
+        if (reqDto.getPageIndex() == null) reqDto.setPageIndex(1);
+        if (reqDto.getPageSize() == null) reqDto.setPageSize(20);
 
-        Map<String, Object> params = new HashMap();
-        params.put("pageIndex", pageIndex);
-        params.put("pageSize", pageSize);
-        PageUtils page = levPersonService.queryPage(params);
+        Map<String, Object> map = beanToMap(reqDto);
+//        log.info("the req map:{}", JSON.toJSONString(map));
+        PageUtils page = levPersonService.queryPage(map);
         return R.ok().put("page", page);
     }
+
+    /**
+     * 将对象装换为map
+     *
+     * @param bean
+     * @return
+     */
+    public static <T> Map<String, Object> beanToMap(T bean) {
+        Map<String, Object> map = Maps.newHashMap();
+        if (bean != null) {
+            BeanMap beanMap = BeanMap.create(bean);
+            for (Object key : beanMap.keySet()) {
+                map.put(key + "", beanMap.get(key));
+            }
+        }
+        return map;
+    }
+
 }
