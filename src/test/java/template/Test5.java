@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.junit.Test;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +84,15 @@ public class Test5 {
 //        x.forEach(System.out::println);
         System.out.println(optional.get());
 
+    }
+
+    @Test
+    public void t4(){
+        String location = "abc";
+        int count = 1;
+        Assert.notNull(location, "Location must not be null");
+        System.out.println("location = [" + location + "]");
+        Assert.state(count == 0,"负面清单已经存在");
     }
 
 

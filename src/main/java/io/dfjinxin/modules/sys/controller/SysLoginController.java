@@ -7,13 +7,12 @@ package io.dfjinxin.modules.sys.controller;
 import io.dfjinxin.common.utils.HttpContextUtils;
 import io.dfjinxin.common.utils.IPUtils;
 import io.dfjinxin.common.utils.R;
+import io.dfjinxin.modules.outsider.entity.LogEntity;
+import io.dfjinxin.modules.outsider.service.LogService;
 import io.dfjinxin.modules.sys.entity.SysLogEntity;
 import io.dfjinxin.modules.sys.entity.SysUserEntity;
 import io.dfjinxin.modules.sys.form.SysLoginForm;
-import io.dfjinxin.modules.sys.service.SysCaptchaService;
-import io.dfjinxin.modules.sys.service.SysLogService;
-import io.dfjinxin.modules.sys.service.SysUserService;
-import io.dfjinxin.modules.sys.service.SysUserTokenService;
+import io.dfjinxin.modules.sys.service.*;
 import io.swagger.annotations.Api;
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
@@ -49,6 +48,9 @@ public class SysLoginController extends AbstractController {
     private SysCaptchaService sysCaptchaService;
     @Autowired
     private SysLogService sysLogService;
+
+    @Autowired
+    private LogService logService;
 
     /**
      * 验证码
@@ -93,7 +95,9 @@ public class SysLoginController extends AbstractController {
 
         //生成token，并保存到数据库
         R r = sysUserTokenService.createToken(user.getUserId());
-        this.saveLoginLog(statrTime, form.getUsername(), "/sys/login");
+//        this.saveLoginLog(statrTime, form.getUsername(), "/sys/login");
+        LogEntity log = new LogEntity(form.getUsername(), new Date(), "登录");
+        logService.saveOrUpdate(log);
         return r;
     }
 

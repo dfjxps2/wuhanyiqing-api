@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.dfjinxin.modules.outsider.dao.LogDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.dfjinxin.modules.outsider.entity.LogEntity" id="logMap">
+        <result property="id" column="id"/>
+        <result property="user" column="user"/>
+        <result property="type" column="type"/>
+        <result property="time" column="time"/>
+    </resultMap>
+
+    <!-- 分页查询 -->
+    <select id="queryPage" resultMap="logMap">
+        SELECT pai.* from log pai
+        where 1=1
+        <if test="param.userName != null and param.userName.trim() != ''">
+            AND pai.user = #{param.userName}
+        </if>
+        <if test="param.type != null and param.type.trim() != ''">
+            AND pai.type = #{param.type}
+        </if>
+        <if test="param.time != null and param.time.trim() != ''">
+            AND DATE_FORMAT(pai.time,'%y-%m-%d') =  DATE_FORMAT(#{param.time} ,'%y-%m-%d')
+        </if>
+        order by pai.time desc
+    </select>
+
+</mapper>

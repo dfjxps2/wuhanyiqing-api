@@ -53,20 +53,6 @@ public class LevPersonController extends AbstractController {
         return R.ok();
     }
 
-
- /*   @PostMapping("/queryByEntry")
-    @ApiOperation("查询test")
-    public R query(@RequestBody LevPerson entry) {
-
-        log.info("新增-离吧人员:" + JSON.toJSONString(entry));
-        LambdaQueryWrapper<LevPerson> queryWrapper = new LambdaQueryWrapper();
-        queryWrapper
-                .eq(!StringUtils.isEmpty(entry.getName()), LevPerson::getName, entry.getName())
-                .eq(!StringUtils.isEmpty(entry.getPhone()), LevPerson::getPhone, entry.getPhone());
-        List<LevPerson> list = levPersonService.list(queryWrapper);
-        return R.ok().put("data", list);
-    }*/
-
     /**
      * 列表
      */
@@ -78,7 +64,6 @@ public class LevPersonController extends AbstractController {
         if (reqDto.getPageSize() == null) reqDto.setPageSize(20);
 
         Map<String, Object> map = beanToMap(reqDto);
-//        log.info("the req map:{}", JSON.toJSONString(map));
         PageUtils page = levPersonService.queryPage(map);
         return R.ok().put("page", page);
     }
