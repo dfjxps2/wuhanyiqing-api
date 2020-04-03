@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.jcraft.jsch.Buffer;
 
 import io.dfjinxin.common.utils.ShiroUtils;
 import io.dfjinxin.modules.outsider.entity.Constant;
@@ -139,7 +140,8 @@ public class LeavePersonController {
 									} else if (columIndex == 3) {
 										e.setCardType(value.toString());
 									} else if (columIndex == 4) {
-										if(value.toString().trim().length()!=18){
+										ECell cardTypeDataCell = row.getCell(cell.getColumnIndex()-1);
+										if("身份证".equals(cardTypeDataCell.getValue().toString())&&value.toString().trim().length()!=18){
 											int indexOf = buffer.indexOf(errorStr);
 											if(indexOf<0){
 												String format = String.format(errorStr+"第%d条,", entityList.size()+1);
