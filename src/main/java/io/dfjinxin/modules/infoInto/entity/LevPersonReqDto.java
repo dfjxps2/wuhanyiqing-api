@@ -23,15 +23,8 @@ public class LevPersonReqDto {
     //证件类型不能为空")
     private String cardType;
 
-//    @NotBlank(message = "证件号不能为空")
-//    private String cardNum;
-
     //"离开时间不能为空")
     private String levTime;
-
-    /*@NotBlank(message = "返回省市不能为空")
-    private String levCity;*/
-
     //"返程方式不能为空")
     private String levBy;
 

@@ -1,6 +1,7 @@
 package io.dfjinxin.modules.infoInto.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Maps;
 import io.dfjinxin.common.utils.Key2Name;
 import io.dfjinxin.common.utils.PageUtils;
@@ -63,6 +64,17 @@ public class LevPersonController extends AbstractController {
         if (reqDto.getPageIndex() == null) reqDto.setPageIndex(1);
         if (reqDto.getPageSize() == null) reqDto.setPageSize(20);
 
+        //当前登录用户
+        if(StringUtils.isEmpty(reqDto.getZoneCd())){
+            return R.error("用户名不能为空!");
+        }
+        //这2个用户可查所有
+        String userName = reqDto.getZoneCd();
+        if ("admin".equals(userName) || "wh_admin".equals(userName)) {
+            reqDto.setZoneCd(null);
+        }else {
+            reqDto.setZoneCd(Key2Name.getNameByKey(reqDto.getZoneCd().trim()));
+        }
         Map<String, Object> map = beanToMap(reqDto);
         PageUtils page = levPersonService.queryPage(map);
         return R.ok().put("page", page);
