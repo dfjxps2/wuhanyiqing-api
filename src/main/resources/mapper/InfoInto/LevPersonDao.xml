@@ -25,6 +25,9 @@
     <select id="queryPage" resultMap="levPersonMap">
         SELECT pai.* from lev_person pai
         where 1=1
+        <if test="param.zoneCd != null and param.zoneCd.trim() != ''">
+            AND pai.zone_cd = #{param.zoneCd}
+        </if>
         <if test="param.name != null and param.name.trim() != ''">
             AND pai.name like CONCAT('%',#{param.name},'%')
         </if>
@@ -52,9 +55,6 @@
         </if>
         <if test="param.backCity != null and param.backCity.trim() != ''">
             AND pai.back_city like CONCAT('%',#{param.backCity},'%')
-        </if>
-        <if test="param.zoneCd != null and param.zoneCd.trim() != ''">
-            AND pai.zone_cd like CONCAT('%',#{param.zoneCd},'%')
         </if>
         <if test="param.levTime != null and param.levTime.trim() != ''">
             AND DATE_FORMAT(pai.lev_time,'%y-%m-%d') =  DATE_FORMAT(#{param.levTime} ,'%y-%m-%d')

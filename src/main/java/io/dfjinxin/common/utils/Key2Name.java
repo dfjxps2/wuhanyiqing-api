@@ -28,7 +28,7 @@ public class Key2Name {
 
     public static String getNameByKey(String key) {
         Map<String, String> map = new HashMap<>();
-        map.put("jh-yy", "新洲区");
+        map.put("jh-yy", "江汉区");
         map.put("dhkf-zhy", "湖新技术开发区");
         map.put("xz-txf", "新洲区");
         map.put("xd-dl", "蔡甸区");
