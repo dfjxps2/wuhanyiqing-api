@@ -76,13 +76,14 @@ public class LeavePersonController {
 	@ApiOperation("已离汉人员信息导入")
 	@PostMapping("/excel/import")
 	@ResponseBody
-	public String importData(@RequestParam("file") MultipartFile file) {
+	public String importData(@RequestParam("file") MultipartFile file,@RequestParam("username") String username) {
 		Map<String,String>  resultMap=new HashMap<String,String>();
 		StringBuffer buffer= new StringBuffer();
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String errorStr="错误记录";
 		SysUserEntity userEntity = ShiroUtils.getUserEntity();
-		String zoneCdStr = Constant.zoneCdKv.get(userEntity.getUsername());
+		//String zoneCdStr = Constant.zoneCdKv.get(userEntity.getUsername());
+		String zoneCdStr = Constant.zoneCdKv.get(username);
 		Reader reader = SimpleReaderTemplate.newInstance();
 		//									0			1				2					3				4						5
 		String[] header = {"序号", "姓名", "电话", "证件类型", "身份证号", "离汉时间", 
@@ -114,6 +115,8 @@ public class LeavePersonController {
 									if (cell.getValue() != null && !"".equals(cell.getValue())) {
 									if(e==null){
 									    e = new LeavePerson();
+									    e.setZoneCd(zoneCdStr);
+									    e.setCreateTime(new Date());
 									}
 									if (columIndex == 0) {
 										indexValue=value;
