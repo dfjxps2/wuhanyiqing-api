@@ -128,6 +128,7 @@ public class OutsiderController {
 			InputStream is = file.getInputStream();
 			List<ESheet> sheets = reader.read(is);
 			List<DetainedPersonInfoEntity> entityList = new ArrayList<DetainedPersonInfoEntity>();
+			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			// int dataTableIndex=0;
 			for (final ESheet sheet : sheets) {
 				DataTableInde tableIndex = getDataTableIndex(sheet);
@@ -160,7 +161,12 @@ public class OutsiderController {
 									} else if (columIndex == 3) {
 										e.setCardNumber(value.toString());
 									} else if (columIndex == 4) {
-										e.setSubmitDate((Date) value);
+										Date submitDated=null;
+										if(value instanceof Date)
+											 submitDated=(Date) value;
+										else 
+											submitDated=sdf.parse(value.toString());
+										e.setSubmitDate(submitDated);
 									} else if (columIndex == 5) {
 										//e.setAreaCd(value.toString());//根据ID
 										e.setAreaCd(userEntity.getOrgId());
@@ -190,14 +196,21 @@ public class OutsiderController {
 									}else if (columIndex == 10) {
 										e.setDestCity(value.toString());
 									} else if (columIndex == 11) {
-								//		e.setDetainedInfo(value.toString());
 										e.setSalveAmount((Double)value);//救助金额
 									} else if (columIndex == 12) {
-										//e.setBz(value.toString());
-										e.setSalveDateStat((Date)value);//救助开始日期
+										Date salveDateStat=null;
+										if(value instanceof Date)
+											salveDateStat=(Date) value;
+										else 
+											salveDateStat=sdf.parse(value.toString());
+										e.setSalveDateStat(salveDateStat);//救助开始日期
 									}else if (columIndex == 13) {
-//										e.setBz(value.toString());
-										e.setSalveDateEnd((Date)value);//救助结束日期
+										Date salveDateEnd=null;
+										if(value instanceof Date)
+											salveDateEnd=(Date) value;
+										else 
+											salveDateEnd=sdf.parse(value.toString());
+										e.setSalveDateEnd(salveDateEnd);//救助结束日期
 									}else if (columIndex == 14) {
 										//	e.setBz(value.toString());修改
 										//e.setSubmitUserId(value.toString());//经办人
