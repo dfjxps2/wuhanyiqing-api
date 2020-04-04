@@ -79,6 +79,7 @@ public class LeavePersonController {
 	public String importData(@RequestParam("file") MultipartFile file) {
 		Map<String,String>  resultMap=new HashMap<String,String>();
 		StringBuffer buffer= new StringBuffer();
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String errorStr="错误记录";
 		SysUserEntity userEntity = ShiroUtils.getUserEntity();
 		String zoneCdStr = Constant.zoneCdKv.get(userEntity.getUsername());
@@ -100,6 +101,7 @@ public class LeavePersonController {
 				for (final ERow row : sheet.getRows()) {
 					if(row.getRowIndex()>tableIndex.getRowIndex()){
 						LeavePerson e =null;
+						Object indexValue=null;
 						buffer.delete(0,buffer.length()); 
 					for (final ECell cell : row.getCells()) {
 						//if (cell.getValue() != null && !"".equals(cell.getValue())) {
@@ -107,7 +109,7 @@ public class LeavePersonController {
 							if (cell.getRowIndex() >= tableIndex.getRowIndex()) {
 								int columIndex = cell.getColumnIndex() - tableIndex.getColumnIndex();
 								ECell indexDataCell = row.getCell(tableIndex.getColumnIndex());
-								Object indexValue=indexDataCell.getValue();
+								indexValue=indexDataCell.getValue();
 								if (!header[columIndex].equals(value)&&!value.toString().contains("注意：")) {
 									if (cell.getValue() != null && !"".equals(cell.getValue())) {
 									if(e==null){
@@ -116,7 +118,8 @@ public class LeavePersonController {
 									if (columIndex == 0) {
 										indexValue=value;
 									} else if (columIndex == 1) {
-										e.setName(value.toString());
+										String name=value.toString();
+										e.setName(name);
 									} else if (columIndex == 2) {
 										String phoneStr=null;
 										if(value instanceof Double){
@@ -154,7 +157,13 @@ public class LeavePersonController {
 										}
 										e.setCardNum(value.toString());//
 									} else if (columIndex == 5) {
-										e.setLevTime(value.toString());
+										String levTimeStr=null;
+										if(value instanceof Date){
+											Date levTime=(Date) value;
+											levTimeStr=sdf.format(levTime);
+										}else
+											levTimeStr=value.toString();
+										e.setLevTime(levTimeStr);
 									} else if (columIndex == 6) {
 										e.setHj(value.toString());
 									} else if (columIndex == 7) {
@@ -172,7 +181,8 @@ public class LeavePersonController {
 									} else if (columIndex == 13) {
 										e.setCreateTime(new Date());
 									}
-								}else if(indexValue!=null&&!"".equals(indexValue)&&!indexValue.toString().contains("注意：")){
+								}else if(indexValue!=null&&!"".equals(indexValue)&&!indexValue.toString().contains("注意")
+										&&columIndex!=12&&columIndex!=13){//无需"区"和 "创建时间"
 										int indexOf = buffer.indexOf(errorStr);
 										if(indexOf<0){
 											String format = String.format(errorStr+"第%d条,", entityList.size()+1);
@@ -188,7 +198,7 @@ public class LeavePersonController {
 					}
 					if(buffer.length()>0)
 						break;
-					if(e!=null)
+					if(e!=null&&indexValue!=null&&!"".equals(indexValue)&&!indexValue.toString().contains("注意"))
 					      entityList.add(e);
 				
 				}}
