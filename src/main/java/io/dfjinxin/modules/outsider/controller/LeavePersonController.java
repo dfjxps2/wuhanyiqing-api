@@ -117,6 +117,7 @@ public class LeavePersonController {
 									    e = new LeavePerson();
 									    e.setZoneCd(zoneCdStr);
 									    e.setCreateTime(new Date());
+									    e.setIsUse(1);
 									}
 									if (columIndex == 0) {
 										indexValue=value;

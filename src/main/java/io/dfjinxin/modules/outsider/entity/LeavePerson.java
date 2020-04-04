@@ -35,6 +35,15 @@ public class LeavePerson {
 		private String backProvince;//返回省
 		private String backCity;//返回市
 //////////////////////////////////////////需求修改二 结束///////////////////////////////////////
+		
+		
+//////////////////////////////////////////需求修改三 开始///////////////////////////////////////
+		private Integer isUse;
+		
+		
+//////////////////////////////////////////需求修改三结束///////////////////////////////////////
+		
+		
 	public Integer getId() {
 		return id;
 	}
@@ -124,6 +133,12 @@ public class LeavePerson {
 	}
 	public void setBackCity(String backCity) {
 		this.backCity = backCity;
+	}
+	public Integer getIsUse() {
+		return isUse;
+	}
+	public void setIsUse(Integer isUse) {
+		this.isUse = isUse;
 	}
 	
 	
