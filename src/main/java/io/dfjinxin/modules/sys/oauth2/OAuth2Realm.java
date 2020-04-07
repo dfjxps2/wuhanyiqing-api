@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 /**
- * 认证
+ * 认证-登录时token&用户 有效性验证
  *
  * @author Mark sunlightcs@gmail.com
  */
@@ -37,7 +37,7 @@ public class OAuth2Realm extends AuthorizingRealm {
     }
 
     /**
-     * 授权(验证权限时调用)
+     * 授权(验证权限时调用) 完成用户授权的方法
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {

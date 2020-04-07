@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,7 +83,7 @@ public class OutsiderController {
 
 	@Autowired
 	private DetainedPersonInfoService personService;
-	
+
 	@Autowired
 	private T99AreaDao areaDao;
 
@@ -114,12 +115,12 @@ public class OutsiderController {
 		return R.ok();
 	}
 
-	
+
 
 	@ApiOperation("导入：同步读，单sheet")
 	@PostMapping("/excel/import")
 	@ResponseBody
-	public String importData(@RequestParam("file") MultipartFile file) {
+	public String importData(@RequestParam("file") MultipartFile file) throws ParseException {
 		SysUserEntity userEntity = ShiroUtils.getUserEntity();
 		Reader reader = SimpleReaderTemplate.newInstance();
 		String[] header = { "序号", "姓名", "电话", "身份证号", "报告日期", "行政县", "滞留人员类型", "当地居住地址","户籍地","安置方式", "目的城市", "救助金额","救助开始日期","救助结束日期","经办人","负责人",
@@ -144,13 +145,13 @@ public class OutsiderController {
 								if (!header[columIndex].equals(value)) {
 									if(e==null){
 									    e = new DetainedPersonInfoEntity();
-									    e.setKeepStatusCd("1");    
+									    e.setKeepStatusCd("1");
 									}
 									if (columIndex == 0) {
 									//	String idStr = value.toString();
 										//if(idStr==null||"".equals(idStr)) {
 										//String	idStr = UUID.randomUUID().toString();
-									        //去掉“-”符号 
+									        //去掉“-”符号
 										//	idStr=idStr.replaceAll("-", "");
 										//}
 									//	e.setId(idStr);
@@ -164,7 +165,7 @@ public class OutsiderController {
 										Date submitDated=null;
 										if(value instanceof Date)
 											 submitDated=(Date) value;
-										else 
+										else
 											submitDated=sdf.parse(value.toString());
 										e.setSubmitDate(submitDated);
 									} else if (columIndex == 5) {
@@ -190,7 +191,7 @@ public class OutsiderController {
 										//e.setPlaceAreaCd(value.toString());
 										//转码：名->编码
 										e.setPlaceAreaCd(getAreaCd(value.toString()));
-									} 
+									}
 									else if (columIndex == 9) {
 										e.setResetMode(value.toString());
 									}else if (columIndex == 10) {
@@ -201,14 +202,14 @@ public class OutsiderController {
 										Date salveDateStat=null;
 										if(value instanceof Date)
 											salveDateStat=(Date) value;
-										else 
+										else
 											salveDateStat=sdf.parse(value.toString());
 										e.setSalveDateStat(salveDateStat);//救助开始日期
 									}else if (columIndex == 13) {
 										Date salveDateEnd=null;
 										if(value instanceof Date)
 											salveDateEnd=(Date) value;
-										else 
+										else
 											salveDateEnd=sdf.parse(value.toString());
 										e.setSalveDateEnd(salveDateEnd);//救助结束日期
 									}else if (columIndex == 14) {
@@ -220,11 +221,11 @@ public class OutsiderController {
 									}else if (columIndex == 16) {
 										e.setBz(value.toString());
 									}
-									
+
 								}
 							}
 						}
-						
+
 					}
 					if(e!=null)
 					      entityList.add(e);
@@ -366,7 +367,7 @@ public class OutsiderController {
 		return buffer;
 	}
 
-	
+
 
 	/**
 	 * 获取数据表的行列索引
@@ -400,7 +401,7 @@ public class OutsiderController {
 	 * @return
 	 */
 	private String getAreaCd(String areaDesc){
-		
+
 		 QueryWrapper<T99AreaEntity> queryWrapper = new QueryWrapper<>();
 	        queryWrapper.like("area_desc", areaDesc);
 		T99AreaEntity selectOne = areaDao.selectOne(queryWrapper);
